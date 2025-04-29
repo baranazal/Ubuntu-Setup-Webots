@@ -1,0 +1,24 @@
+running develop
+running egg_info
+creating conveyor_webots_sim.egg-info
+writing conveyor_webots_sim.egg-info/PKG-INFO
+writing dependency_links to conveyor_webots_sim.egg-info/dependency_links.txt
+writing requirements to conveyor_webots_sim.egg-info/requires.txt
+writing top-level names to conveyor_webots_sim.egg-info/top_level.txt
+writing manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+reading manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+writing manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/bara/ros2_ws/install/conveyor_webots_sim/lib/python3.12/site-packages/conveyor-webots-sim.egg-link (link to .)
+
+Installed /home/bara/ros2_ws/build/conveyor_webots_sim
+running symlink_data
+symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/package.xml -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/ament_index/resource_index/packages
+symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/package.xml -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim
+creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/launch
+symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/launch/conveyor_sim.launch.py -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/launch
+creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/worlds
+symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/worlds/conveyor_world.wbt -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/worlds
+creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers
+creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers/conveyor_controller
+symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/controllers/conveyor_controller/conveyor_controller.py -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers/conveyor_controller

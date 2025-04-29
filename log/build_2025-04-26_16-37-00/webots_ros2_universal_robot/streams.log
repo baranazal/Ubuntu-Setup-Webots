@@ -1,0 +1,118 @@
+[1.362s] Invoking command in '/home/bara/ros2_ws/src/webots_ros2_universal_robot': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/build/webots_ros2_universal_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/webots_ros2_universal_robot build --build-base /home/bara/ros2_ws/build/webots_ros2_universal_robot/build install --record /home/bara/ros2_ws/build/webots_ros2_universal_robot/install.log --single-version-externally-managed install_data
+[1.658s] running egg_info
+[1.659s] creating ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info
+[1.680s] writing ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/PKG-INFO
+[1.683s] writing dependency_links to ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/dependency_links.txt
+[1.683s] writing entry points to ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/entry_points.txt
+[1.683s] writing requirements to ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/requires.txt
+[1.683s] writing top-level names to ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/top_level.txt
+[1.683s] writing manifest file '../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/SOURCES.txt'
+[1.726s] reading manifest file '../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/SOURCES.txt'
+[1.729s] writing manifest file '../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info/SOURCES.txt'
+[1.729s] running build
+[1.729s] running build_py
+[1.729s] creating /home/bara/ros2_ws/build/webots_ros2_universal_robot/build
+[1.729s] creating /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib
+[1.729s] creating /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot
+[1.729s] copying webots_ros2_universal_robot/follow_joint_trajectory_client.py -> /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot
+[1.732s] copying webots_ros2_universal_robot/abb_controller.py -> /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot
+[1.732s] copying webots_ros2_universal_robot/__init__.py -> /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot
+[1.732s] copying webots_ros2_universal_robot/ur5e_controller.py -> /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot
+[1.732s] running install
+[1.737s] running install_lib
+[1.759s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot
+[1.759s] copying /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot/follow_joint_trajectory_client.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot
+[1.759s] copying /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot/abb_controller.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot
+[1.759s] copying /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot/__init__.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot
+[1.761s] copying /home/bara/ros2_ws/build/webots_ros2_universal_robot/build/lib/webots_ros2_universal_robot/ur5e_controller.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot
+[1.761s] byte-compiling /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot/follow_joint_trajectory_client.py to follow_joint_trajectory_client.cpython-312.pyc
+[1.761s] byte-compiling /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot/abb_controller.py to abb_controller.cpython-312.pyc
+[1.761s] byte-compiling /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot/__init__.py to __init__.cpython-312.pyc
+[1.762s] byte-compiling /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot/ur5e_controller.py to ur5e_controller.cpython-312.pyc
+[1.763s] running install_data
+[1.764s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/ament_index
+[1.764s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/ament_index/resource_index
+[1.764s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/ament_index/resource_index/packages
+[1.765s] copying resource/webots_ros2_universal_robot -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/ament_index/resource_index/packages
+[1.765s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/launch
+[1.765s] copying launch/robot_launch/robot_nodes_launch.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/launch
+[1.766s] copying launch/robot_launch/robot_world_launch.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/launch
+[1.766s] copying launch/robot_launch/robot_moveit_nodes_launch.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/launch
+[1.766s] copying launch/multirobot_launch.py -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/launch
+[1.766s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/worlds
+[1.766s] copying worlds/universal_robot.wbt -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/worlds
+[1.766s] copying worlds/.universal_robot.wbproj -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/worlds
+[1.766s] copying worlds/robotic_arms.wbt -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/worlds
+[1.766s] copying worlds/.robotic_arms.wbproj -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/worlds
+[1.766s] copying package.xml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot
+[1.766s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.766s] copying resource/moveit_ur5e.srdf -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/moveit_movegroup.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/ros2_control_abb_config.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/ur5e_with_gripper.urdf -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/ros2_control_config.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/webots_abb_description.urdf -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/moveit_kinematics.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/moveit_controllers.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/moveit_visualization.rviz -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] copying resource/ur5e_with_gripper.urdf.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource
+[1.767s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq
+[1.767s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization
+[1.767s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/cfg
+[1.767s] copying resource/robotiq/robotiq_3f_gripper_visualization/cfg/robotiq-3f-gripper_articulated_macro.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/cfg
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/cfg/robotiq-3f-gripper_finger_articulated_macro.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/cfg
+[1.773s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes
+[1.773s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated
+[1.773s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual/palm.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual/link_3.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual/link_2.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual/link_0.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual/link_1.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/visual
+[1.773s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision/link_2.STL -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision/palm.STL -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision/link_1.STL -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision/link_3.STL -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] copying resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision/link_0.STL -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/robotiq/robotiq_3f_gripper_visualization/meshes/robotiq-3f-gripper_articulated/collision
+[1.774s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver
+[1.774s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description
+[1.774s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes
+[1.774s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e
+[1.781s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.781s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/wrist1.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.781s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/base.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.781s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/shoulder.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.781s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/upperarm.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/wrist3.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/wrist2.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual/forearm.dae -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/visual
+[1.782s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/wrist1.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/wrist3.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/wrist2.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/forearm.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/upperarm.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/base.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.782s] copying resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision/shoulder.stl -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/meshes/ur5e/collision
+[1.783s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/urdf/ur_macro.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/urdf/ur.urdf.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/urdf/ur.ros2_control.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf
+[1.783s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf/inc
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/urdf/inc/ur_common.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf/inc
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/urdf/inc/ur_transmissions.xacro -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/urdf/inc
+[1.783s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/config/initial_positions.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config
+[1.783s] creating /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e/visual_parameters.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e
+[1.783s] copying resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e/default_kinematics.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e
+[1.787s] copying resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e/physical_parameters.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e
+[1.787s] copying resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e/joint_limits.yaml -> /home/bara/ros2_ws/install/webots_ros2_universal_robot/share/webots_ros2_universal_robot/resource/Universal_Robots_ROS2_Driver/ur_description/config/ur5e
+[1.787s] running install_egg_info
+[1.807s] Copying ../../build/webots_ros2_universal_robot/webots_ros2_universal_robot.egg-info to /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages/webots_ros2_universal_robot-2025.0.0-py3.12.egg-info
+[1.808s] running install_scripts
+[1.966s] Installing abb_controller script to /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/webots_ros2_universal_robot
+[1.967s] Installing ur5e_controller script to /home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/webots_ros2_universal_robot
+[1.967s] writing list of installed files to '/home/bara/ros2_ws/build/webots_ros2_universal_robot/install.log'
+[1.999s] Invoked command in '/home/bara/ros2_ws/src/webots_ros2_universal_robot' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/build/webots_ros2_universal_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/install/webots_ros2_universal_robot/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/webots_ros2_universal_robot build --build-base /home/bara/ros2_ws/build/webots_ros2_universal_robot/build install --record /home/bara/ros2_ws/build/webots_ros2_universal_robot/install.log --single-version-externally-managed install_data

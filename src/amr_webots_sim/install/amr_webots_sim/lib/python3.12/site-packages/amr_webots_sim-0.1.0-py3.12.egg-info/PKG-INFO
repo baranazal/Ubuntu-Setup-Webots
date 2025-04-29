@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: amr-webots-sim
+Version: 0.1.0
+Summary: A ROS2 package for simulating Autonomous Mobile Robots (AMRs) with mecanum wheels in Webots.
+Maintainer: your_name
+Maintainer-email: your_email@example.com
+License: Apache License 2.0

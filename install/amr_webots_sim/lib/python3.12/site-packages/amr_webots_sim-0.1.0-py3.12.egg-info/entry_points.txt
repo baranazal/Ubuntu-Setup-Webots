@@ -1,0 +1,4 @@
+[console_scripts]
+amr_controller = amr_webots_sim.amr_controller:main
+belt_controller = amr_webots_sim.belt_controller:main
+ned_controller = amr_webots_sim.ned_controller:main

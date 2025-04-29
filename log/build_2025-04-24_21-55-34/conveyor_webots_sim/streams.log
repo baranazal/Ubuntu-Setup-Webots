@@ -1,0 +1,26 @@
+[1.672s] Invoking command in '/home/bara/ros2_ws/build/conveyor_webots_sim': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/build/conveyor_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/install/conveyor_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/bara/ros2_ws/build/conveyor_webots_sim/build --no-deps symlink_data
+[2.398s] running develop
+[3.343s] running egg_info
+[3.343s] creating conveyor_webots_sim.egg-info
+[3.425s] writing conveyor_webots_sim.egg-info/PKG-INFO
+[3.425s] writing dependency_links to conveyor_webots_sim.egg-info/dependency_links.txt
+[3.425s] writing requirements to conveyor_webots_sim.egg-info/requires.txt
+[3.425s] writing top-level names to conveyor_webots_sim.egg-info/top_level.txt
+[3.425s] writing manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+[3.606s] reading manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+[3.607s] writing manifest file 'conveyor_webots_sim.egg-info/SOURCES.txt'
+[3.689s] running build_ext
+[3.690s] Creating /home/bara/ros2_ws/install/conveyor_webots_sim/lib/python3.12/site-packages/conveyor-webots-sim.egg-link (link to .)
+[3.691s] 
+[3.691s] Installed /home/bara/ros2_ws/build/conveyor_webots_sim
+[3.692s] running symlink_data
+[3.692s] symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/package.xml -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/ament_index/resource_index/packages
+[3.692s] symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/package.xml -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim
+[3.693s] creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/launch
+[3.694s] symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/launch/conveyor_sim.launch.py -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/launch
+[3.695s] creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/worlds
+[3.695s] symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/worlds/conveyor_world.wbt -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/worlds
+[3.700s] creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers
+[3.700s] creating /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers/conveyor_controller
+[3.700s] symbolically linking /home/bara/ros2_ws/build/conveyor_webots_sim/controllers/conveyor_controller/conveyor_controller.py -> /home/bara/ros2_ws/install/conveyor_webots_sim/share/conveyor_webots_sim/controllers/conveyor_controller
+[3.809s] Invoked command in '/home/bara/ros2_ws/build/conveyor_webots_sim' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/build/conveyor_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/install/conveyor_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/bara/ros2_ws/build/conveyor_webots_sim/build --no-deps symlink_data

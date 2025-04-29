@@ -1,0 +1,49 @@
+[1.529s] Invoking command in '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build
+[2.050s] running develop
+[2.510s] Removing /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr-webots-sim.egg-link (link to .)
+[2.566s] Invoked command in '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build
+[2.567s] Invoking command in '/home/bara/ros2_ws/src/amr_webots_sim': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/amr_webots_sim build --build-base /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build install --record /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/install.log --single-version-externally-managed install_data --force
+[3.044s] running egg_info
+[3.073s] writing build/amr_webots_sim/amr_webots_sim.egg-info/PKG-INFO
+[3.074s] writing dependency_links to build/amr_webots_sim/amr_webots_sim.egg-info/dependency_links.txt
+[3.076s] writing entry points to build/amr_webots_sim/amr_webots_sim.egg-info/entry_points.txt
+[3.076s] writing requirements to build/amr_webots_sim/amr_webots_sim.egg-info/requires.txt
+[3.076s] writing top-level names to build/amr_webots_sim/amr_webots_sim.egg-info/top_level.txt
+[3.138s] reading manifest file 'build/amr_webots_sim/amr_webots_sim.egg-info/SOURCES.txt'
+[3.140s] writing manifest file 'build/amr_webots_sim/amr_webots_sim.egg-info/SOURCES.txt'
+[3.140s] running build
+[3.140s] running build_py
+[3.142s] creating /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build
+[3.142s] creating /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib
+[3.142s] creating /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib/amr_webots_sim
+[3.142s] copying amr_webots_sim/amr_controller.py -> /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib/amr_webots_sim
+[3.142s] copying amr_webots_sim/__init__.py -> /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib/amr_webots_sim
+[3.142s] running install
+[3.151s] running install_lib
+[3.181s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim
+[3.181s] copying /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib/amr_webots_sim/amr_controller.py -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim
+[3.234s] copying /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build/lib/amr_webots_sim/__init__.py -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim
+[3.234s] byte-compiling /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim/amr_controller.py to amr_controller.cpython-312.pyc
+[3.234s] byte-compiling /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim/__init__.py to __init__.cpython-312.pyc
+[3.234s] running install_data
+[3.235s] copying resource/amr_webots_sim -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index/packages
+[3.235s] copying package.xml -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim
+[3.235s] copying README.md -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim
+[3.235s] copying worlds/amr_world.wbt -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/worlds
+[3.235s] copying worlds/AMR.proto -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/worlds
+[3.235s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/resource
+[3.235s] copying resource/amr.rviz -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/resource
+[3.235s] copying resource/amr_robot.urdf -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/resource
+[3.235s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/launch
+[3.235s] copying launch/amr_simulation.launch.py -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/launch
+[3.235s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/controllers
+[3.236s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/controllers/amr_controller
+[3.236s] copying controllers/amr_controller/amr_controller.py -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/controllers/amr_controller
+[3.236s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/protos
+[3.236s] copying protos/AMR.proto -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/protos
+[3.236s] running install_egg_info
+[3.243s] Copying build/amr_webots_sim/amr_webots_sim.egg-info to /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr_webots_sim-0.0.1-py3.12.egg-info
+[3.243s] running install_scripts
+[3.496s] Installing amr_controller script to /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/amr_webots_sim
+[3.497s] writing list of installed files to '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/install.log'
+[3.551s] Invoked command in '/home/bara/ros2_ws/src/amr_webots_sim' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/amr_webots_sim build --build-base /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build install --record /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/install.log --single-version-externally-managed install_data --force

@@ -1,0 +1,26 @@
+[1.127s] Invoking command in '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build --no-deps symlink_data
+[1.727s] running develop
+[2.073s] running egg_info
+[2.073s] creating amr_webots_sim.egg-info
+[2.102s] writing amr_webots_sim.egg-info/PKG-INFO
+[2.103s] writing dependency_links to amr_webots_sim.egg-info/dependency_links.txt
+[2.104s] writing entry points to amr_webots_sim.egg-info/entry_points.txt
+[2.104s] writing requirements to amr_webots_sim.egg-info/requires.txt
+[2.106s] writing top-level names to amr_webots_sim.egg-info/top_level.txt
+[2.106s] writing manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+[2.176s] reading manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+[2.176s] writing manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+[2.220s] running build_ext
+[2.221s] Creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr-webots-sim.egg-link (link to .)
+[2.222s] Installing amr_controller script to /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/amr_webots_sim
+[2.222s] 
+[2.222s] Installed /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim
+[2.223s] running symlink_data
+[2.224s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index
+[2.224s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index
+[2.225s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index/packages
+[2.225s] symbolically linking /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/resource/amr_webots_sim -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index/packages
+[2.226s] symbolically linking /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/package.xml -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim
+[2.226s] creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/worlds
+[2.227s] error: can't copy '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/worlds/amr_world.wbt': doesn't exist or not a regular file
+[2.294s] Invoked command in '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim' returned '1': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/build --no-deps symlink_data

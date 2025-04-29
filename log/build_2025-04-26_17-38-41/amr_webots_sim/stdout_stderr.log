@@ -1,0 +1,16 @@
+running develop
+running egg_info
+writing amr_webots_sim.egg-info/PKG-INFO
+writing dependency_links to amr_webots_sim.egg-info/dependency_links.txt
+writing entry points to amr_webots_sim.egg-info/entry_points.txt
+writing requirements to amr_webots_sim.egg-info/requires.txt
+writing top-level names to amr_webots_sim.egg-info/top_level.txt
+reading manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+writing manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/bara/ros2_ws/install/amr_webots_sim/lib/python3.12/site-packages/amr-webots-sim.egg-link (link to .)
+Installing amr_controller script to /home/bara/ros2_ws/install/amr_webots_sim/lib/amr_webots_sim
+Installing ned_controller script to /home/bara/ros2_ws/install/amr_webots_sim/lib/amr_webots_sim
+
+Installed /home/bara/ros2_ws/build/amr_webots_sim
+running symlink_data

@@ -1,0 +1,114 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/CardboardBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/conveyors/protos/ConveyorBelt.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/niryo/ned/protos/Ned.proto"
+EXTERNPROTO "../worlds/AMR.proto"
+
+WorldInfo {
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material1 "default"
+      material2 "default"
+      coulombFriction [ 0.8 ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.5 0.5 0.7 1.8
+  position 0.5 -5.0 4.5
+  follow "AMR"
+}
+TexturedBackground { }
+TexturedBackgroundLight { }
+RectangleArena {
+  floorSize 10 10
+  floorTileSize 0.5 0.5
+  wallHeight 0.3
+}
+
+# Conveyor Belt in the middle bottom of the floor
+DEF conveyor_belt ConveyorBelt {
+  translation 0 3.5 0
+  rotation 0 0 1 0
+  name "conveyor belt"
+  size 1.5 0.6 0.5
+  borderThickness 0.03
+  borderHeight 0.01
+  speed 0.5
+}
+
+# Belt Supervisor - invisible robot to control the conveyor belt
+Robot {
+  name "belt_supervisor"
+  controller "belt_supervisor"
+  supervisor TRUE
+  translation 0 3.5 -0.5
+  children [
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 1 0
+            transparency 1
+          }
+          geometry Box {
+            size 0.1 0.1 0.1
+          }
+        }
+      ]
+      name "supervisor_body"
+    }
+  ]
+}
+
+# Robotic arm beside the conveyor belt
+Ned {
+  translation 2.5 4 0.15
+  rotation 0 0 1 3.14159
+  name "Ned"
+  controller "<extern>"
+}
+
+# AMR robots positioned in a line along the x-axis
+AMR {
+  translation 0 0 0
+  name "AMR"
+  baseColor 0.2 0.2 0.6
+  controller "amr_controller"
+}
+
+AMR {
+  translation 1.0 0 0
+  name "AMR2"
+  baseColor 0.6 0.2 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation 2.0 0 0
+  name "AMR3"
+  baseColor 0.2 0.6 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation -1.0 0 0
+  name "AMR4"
+  baseColor 0.8 0.8 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation -2.0 0 0
+  name "AMR5"
+  baseColor 0.6 0.2 0.6
+  controller "amr_controller"
+}
+
+# End of world file
