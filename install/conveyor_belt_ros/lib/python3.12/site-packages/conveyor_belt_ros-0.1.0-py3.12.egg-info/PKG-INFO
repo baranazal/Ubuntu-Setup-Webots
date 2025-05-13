@@ -1,8 +1,0 @@
-Metadata-Version: 2.1
-Name: conveyor-belt-ros
-Version: 0.1.0
-Summary: ROS2 package for conveyor belt simulation
-Maintainer: user
-Maintainer-email: user@example.com
-License: Apache License 2.0
-License-File: LICENSE

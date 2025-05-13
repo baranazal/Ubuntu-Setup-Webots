@@ -1,1 +1,0 @@
-/home/bara/ros2_ws/build/conveyor_belt_ros/controllers/conveyor_controller/conveyor_controller.py

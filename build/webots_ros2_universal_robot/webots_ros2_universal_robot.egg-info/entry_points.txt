@@ -1,6 +1,0 @@
-[console_scripts]
-abb_controller = webots_ros2_universal_robot.abb_controller:main
-ur5e_controller = webots_ros2_universal_robot.ur5e_controller:main
-
-[launch.frontend.launch_extension]
-launch_ros = launch_ros

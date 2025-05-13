@@ -1,1 +1,0 @@
-/home/bara/ros2_ws/build/amr_webots_sim/amr_webots_sim/__init__.py

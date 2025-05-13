@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: conveyor-belt-sim
-Version: 0.1.0
-Summary: A ROS2 package for simulating industrial conveyor belts in Webots with a REST API for control and monitoring.
-Maintainer: your_name
-Maintainer-email: your_email@example.com
-License: Apache License 2.0

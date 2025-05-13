@@ -1,1 +1,0 @@
-/home/bara/ros2_ws/src/conveyor_webots_sim/setup.py

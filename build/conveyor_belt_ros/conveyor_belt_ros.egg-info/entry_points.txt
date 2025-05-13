@@ -1,2 +1,0 @@
-[console_scripts]
-conveyor_interface = conveyor_belt_ros.conveyor_interface:main

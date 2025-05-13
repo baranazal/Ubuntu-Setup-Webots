@@ -1,1 +1,0 @@
-/home/bara/ros2_ws/build/amr_webots_sim/README.md

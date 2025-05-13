@@ -1,6 +1,0 @@
-[console_scripts]
-api_server = conveyor_belt_sim.conveyor_api:main
-conveyor_controller = conveyor_belt_sim.conveyor_controller:main
-
-[webots_ros2_driver.pythonPath]
-webots_python_path = conveyor_belt_sim:get_pythonpath
