@@ -16,7 +16,7 @@ PROTO AMR [
     children [
       # Enhanced Robot Body (Chassis)
       Transform {
-        translation 0 0 0.15
+        translation 0 0 0.075
         children [
           # Main chassis body
           Shape {
@@ -26,12 +26,12 @@ PROTO AMR [
               roughness 0.3
             }
             geometry Box {
-              size 0.4 0.3 0.12
+              size 0.2 0.15 0.06
             }
           }
           # Top plate with industrial design
           Transform {
-            translation 0 0 0.06
+            translation 0 0 0.03
             children [
               Shape {
                 appearance PBRAppearance {
@@ -40,14 +40,14 @@ PROTO AMR [
                   roughness 0.2
                 }
                 geometry Box {
-                  size 0.38 0.28 0.02
+                  size 0.19 0.14 0.01
                 }
               }
             ]
           }
           # Front status LED panel
           Transform {
-            translation 0.19 0 0.07
+            translation 0.095 0 0.035
             children [
               Shape {
                 appearance PBRAppearance {
@@ -57,7 +57,7 @@ PROTO AMR [
                   roughness 0.2
                 }
                 geometry Box {
-                  size 0.02 0.1 0.02
+                  size 0.01 0.05 0.01
                 }
               }
             ]
@@ -69,7 +69,7 @@ PROTO AMR [
       HingeJoint {
         jointParameters HingeJointParameters {
           axis 0 1 0
-          anchor -0.15 0.17 0.05
+          anchor -0.075 0.085 0.025
         }
         device [
           RotationalMotor {
@@ -82,7 +82,7 @@ PROTO AMR [
           }
         ]
         endPoint Solid {
-          translation -0.15 0.17 0.05
+          translation -0.075 0.085 0.025
           rotation 1 0 0 1.5708
           children [
             Group {
@@ -95,8 +95,8 @@ PROTO AMR [
                     roughness 0.3
                   }
                   geometry Cylinder {
-                    height 0.04
-                    radius 0.055
+                    height 0.02
+                    radius 0.0275
                     subdivision 32
                   }
                 }
@@ -111,7 +111,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -126,7 +126,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -136,12 +136,12 @@ PROTO AMR [
           ]
           name "rear_left_wheel"
           boundingObject Cylinder {
-            height 0.04
-            radius 0.055
+            height 0.02
+            radius 0.0275
           }
           physics Physics {
             density -1
-            mass 0.15
+            mass 0.075
           }
         }
       }
@@ -150,7 +150,7 @@ PROTO AMR [
       HingeJoint {
         jointParameters HingeJointParameters {
           axis 0 1 0
-          anchor -0.15 -0.17 0.05
+          anchor -0.075 -0.085 0.025
         }
         device [
           RotationalMotor {
@@ -163,7 +163,7 @@ PROTO AMR [
           }
         ]
         endPoint Solid {
-          translation -0.15 -0.17 0.05
+          translation -0.075 -0.085 0.025
           rotation 1 0 0 1.5708
           children [
             Group {
@@ -176,8 +176,8 @@ PROTO AMR [
                     roughness 0.3
                   }
                   geometry Cylinder {
-                    height 0.04
-                    radius 0.055
+                    height 0.02
+                    radius 0.0275
                     subdivision 32
                   }
                 }
@@ -192,7 +192,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -207,7 +207,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -217,12 +217,12 @@ PROTO AMR [
           ]
           name "rear_right_wheel"
           boundingObject Cylinder {
-            height 0.04
-            radius 0.055
+            height 0.02
+            radius 0.0275
           }
           physics Physics {
             density -1
-            mass 0.15
+            mass 0.075
           }
         }
       }
@@ -231,7 +231,7 @@ PROTO AMR [
       HingeJoint {
         jointParameters HingeJointParameters {
           axis 0 1 0
-          anchor 0.15 0.17 0.05
+          anchor 0.075 0.085 0.025
         }
         device [
           RotationalMotor {
@@ -244,7 +244,7 @@ PROTO AMR [
           }
         ]
         endPoint Solid {
-          translation 0.15 0.17 0.05
+          translation 0.075 0.085 0.025
           rotation 1 0 0 1.5708
           children [
             Group {
@@ -257,8 +257,8 @@ PROTO AMR [
                     roughness 0.3
                   }
                   geometry Cylinder {
-                    height 0.04
-                    radius 0.055
+                    height 0.02
+                    radius 0.0275
                     subdivision 32
                   }
                 }
@@ -273,7 +273,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -288,7 +288,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -298,12 +298,12 @@ PROTO AMR [
           ]
           name "front_left_wheel"
           boundingObject Cylinder {
-            height 0.04
-            radius 0.055
+            height 0.02
+            radius 0.0275
           }
           physics Physics {
             density -1
-            mass 0.15
+            mass 0.075
           }
         }
       }
@@ -312,7 +312,7 @@ PROTO AMR [
       HingeJoint {
         jointParameters HingeJointParameters {
           axis 0 1 0
-          anchor 0.15 -0.17 0.05
+          anchor 0.075 -0.085 0.025
         }
         device [
           RotationalMotor {
@@ -325,7 +325,7 @@ PROTO AMR [
           }
         ]
         endPoint Solid {
-          translation 0.15 -0.17 0.05
+          translation 0.075 -0.085 0.025
           rotation 1 0 0 1.5708
           children [
             Group {
@@ -338,8 +338,8 @@ PROTO AMR [
                     roughness 0.3
                   }
                   geometry Cylinder {
-                    height 0.04
-                    radius 0.055
+                    height 0.02
+                    radius 0.0275
                     subdivision 32
                   }
                 }
@@ -354,7 +354,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -369,7 +369,7 @@ PROTO AMR [
                         roughness 0.4
                       }
                       geometry Box {
-                        size 0.06 0.015 0.04
+                        size 0.03 0.0075 0.02
                       }
                     }
                   ]
@@ -379,19 +379,19 @@ PROTO AMR [
           ]
           name "front_right_wheel"
           boundingObject Cylinder {
-            height 0.04
-            radius 0.055
+            height 0.02
+            radius 0.0275
           }
           physics Physics {
             density -1
-            mass 0.15
+            mass 0.075
           }
         }
       }
       
       # Sensors
       Lidar {
-        translation -0.15 0 0.1
+        translation -0.075 0 0.05
         name "lidar"
         horizontalResolution 360
         fieldOfView 6.28
@@ -410,16 +410,16 @@ PROTO AMR [
     
     # Updated bounding object for physics
     boundingObject Transform {
-      translation 0 0 0.15
+      translation 0 0 0.075
       children [
         Box {
-          size 0.3 0.2 0.1
+          size 0.15 0.1 0.05
         }
       ]
     }
     physics Physics {
       density -1
-      mass 3
+      mass 1.5
     }
   }
 } 

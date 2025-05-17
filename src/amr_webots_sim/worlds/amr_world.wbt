@@ -7,6 +7,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/conveyors/protos/ConveyorBelt.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/niryo/ned/protos/Ned.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/PlasticCrate.proto"
 EXTERNPROTO "../worlds/AMR.proto"
 
 WorldInfo {
@@ -32,23 +33,30 @@ RectangleArena {
   wallHeight 0.3
 }
 
-# Conveyor Belt in the middle bottom of the floor
 DEF conveyor_belt ConveyorBelt {
-  translation 0 3.5 0
-  rotation 0 0 1 0
+  translation -0.22 -0.42 0
+  rotation 0 0 1 -3.14
   name "conveyor belt"
-  size 1.5 0.6 0.5
-  borderThickness 0.03
-  borderHeight 0.01
-  speed 0.5
+  size 0.6 0.3 0.3
+  borderThickness 0.000001
+  borderHeight 0
+  speed 0.1
 }
 
-# Belt Supervisor - invisible robot to control the conveyor belt
+DEF container PlasticCrate {
+  translation -0.69 -0.42 0
+  rotation 0 0 1 0
+  name "collection container"
+  size 0.3 0.3 0.1
+  color 0.2 0.5 0.9
+  mass 0
+}
+
 Robot {
   name "belt_supervisor"
   controller "belt_supervisor"
   supervisor TRUE
-  translation 0 3.5 -0.5
+  translation -0.8 0 -0.5
   children [
     Solid {
       children [
@@ -67,48 +75,44 @@ Robot {
   ]
 }
 
-# Robotic arm beside the conveyor belt
 Ned {
-  translation 2.5 4 0.15
+  translation 0 0 0
   rotation 0 0 1 3.14159
   name "Ned"
   controller "<extern>"
 }
 
-# AMR robots positioned in a line along the x-axis
 AMR {
-  translation 0 0 0
+  translation 1.0 0 0
+  rotation 0 0 1 3.14159
   name "AMR"
   baseColor 0.2 0.2 0.6
   controller "amr_controller"
 }
 
-AMR {
-  translation 1.0 0 0
-  name "AMR2"
-  baseColor 0.6 0.2 0.2
-  controller "amr_controller"
-}
 
-AMR {
-  translation 2.0 0 0
-  name "AMR3"
-  baseColor 0.2 0.6 0.2
-  controller "amr_controller"
-}
-
-AMR {
-  translation -1.0 0 0
-  name "AMR4"
-  baseColor 0.8 0.8 0.2
-  controller "amr_controller"
-}
-
-AMR {
-  translation -2.0 0 0
-  name "AMR5"
-  baseColor 0.6 0.2 0.6
-  controller "amr_controller"
+DEF PAYLOAD_BOX Solid {
+  translation 1.0 0 0.25
+  rotation -0.7070948225251079 0 0.7070991055526298 -3.131049819080539
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.8 0.5 0.2
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.06 0.03 0.04
+      }
+    }
+  ]
+  name "payload_box"
+  boundingObject Box {
+    size 0.06 0.03 0.04
+  }
+  physics Physics {
+    mass 0.001
+  }
 }
 
 # End of world file

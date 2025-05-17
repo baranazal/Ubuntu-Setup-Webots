@@ -61,9 +61,9 @@ orchestration_status = {
 orchestration_lock = threading.Lock()
 
 PICKUP_POSITIONS = {
-    "amr_position": {"x": 0.237, "y": 0.0, "z": 0.0}
-    
-    }
+    "amr_position": {"x": 0.237, "y": 0.0, "z": 0.0},
+    "conveyor_position": {"x": -0.5, "y": 0.0, "z": 0.0},
+}
 
 PICKUP_SEQUENCE = [
     {"action": "move", "movement": "home", "delay": 1.0},
@@ -71,9 +71,9 @@ PICKUP_SEQUENCE = [
     
     {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
     
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.96, 0.0, 0.0, 0.0], "delay": 1.5},
+    {"action": "move", "joint_positions": [1.57, 0.0, 0.97, 0.0, 0.0, 0.0], "delay": 1.5},
     
-    {"action": "move", "joint_positions": [1.57, 0.08, 0.96, 0.0, 0.0, 0.0], "delay": 2.0},
+    {"action": "move", "joint_positions": [1.57, 0.09, 0.97, 0.0, 0.0, 0.0], "delay": 2.0},
     
     {"action": "gripper", "position": -1.4, "delay": 1.5},
     
@@ -950,8 +950,519 @@ operation_handler = None
 
 app = Flask(__name__)
 
-############################################################ START OF TESTING API ############################################################  
-# This one performs the entire orchestration from start to finish
+@app.route('/api/status/<robot_id>', methods=['GET'])
+def get_status(robot_id):
+    """API endpoint to get the status of a specific AMR robot"""
+    with status_lock:
+        if robot_id in robot_status:
+            status = robot_status[robot_id]
+            
+            nav_info = {}
+            with nav_lock:
+                if robot_id in nav_status:
+                    robot_nav = nav_status[robot_id]
+                    nav_info = {
+                        "active": robot_nav["active"],
+                        "status": robot_nav["status"]
+                    }
+                    
+                    if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
+                        nav_info["target_coordinates"] = robot_nav["target_coordinates"]
+            
+            velocities = None
+            if "velocities" in status:
+                velocities = status["velocities"]
+            
+            return jsonify({
+                "robot_id": robot_id,
+                "position": status["position"],
+                "orientation": status["orientation"],
+                "moving": status["moving"],
+                "last_updated": status["last_updated"],
+                "navigation": nav_info,
+                "velocities": velocities
+            })
+        else:
+            return jsonify({
+                "error": f"Robot {robot_id} not found",
+                "available_robots": list(robot_status.keys())
+            }), 404
+
+@app.route('/api/redirect', methods=['POST'])
+def redirect_robot():
+    """API endpoint to redirect a robot to specific coordinates"""
+    global navigator_node
+
+    data = request.json
+    
+    if not data:
+        return jsonify({"error": "Missing request body"}), 400
+    
+    required_fields = ['robot_id']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    if 'x' not in data or 'y' not in data:
+        return jsonify({"error": "Missing coordinate fields: x and y are required"}), 400
+    
+    robot_id = data['robot_id']
+    target_x = float(data['x'])
+    target_y = float(data['y'])
+    
+    if 'z' in data:
+        target_z = float(data['z'])
+    else:
+        target_z = 0.0
+    
+    with status_lock:
+        if robot_id not in robot_status:
+            return jsonify({
+                "error": f"Robot {robot_id} not found",
+                "available_robots": list(robot_status.keys())
+            }), 404
+    
+    if navigator_node and navigator_node.start_navigation_to_coordinates(robot_id, target_x, target_y, target_z):
+        return jsonify({
+            "status": "success",
+            "message": f"Robot {robot_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z})",
+            "robot_id": robot_id,
+            "target_position": {"x": target_x, "y": target_y, "z": target_z}
+        })
+    else:
+        return jsonify({
+            "error": "Failed to start navigation",
+            "status": "failed"
+        }), 500
+
+@app.route('/api/belt/stop', methods=['POST'])
+def stop_belt():
+    """Stop the conveyor belt"""
+    with belt_lock:
+        if not belt_status["is_running"] and belt_status["current_speed"] == 0.0:
+            return jsonify({
+                "success": True,
+                "message": "Belt is already stopped",
+                "status": "stopped"
+            })
+    
+    success, _ = belt_controller.set_belt_speed(0.0)
+    
+    if success:
+        return jsonify({
+            "success": True,
+            "message": "Belt stopped"
+        })
+    else:
+        return jsonify({"success": False, "error": "Failed to stop belt"}), 500
+
+@app.route('/api/belt/movement', methods=['POST'])
+def control_belt_movement():
+    """Control belt movement with direction and speed parameters"""
+    if not request.json:
+        return jsonify({"success": False, "error": "JSON payload required"}), 400
+    
+    if 'direction' not in request.json:
+        return jsonify({"success": False, "error": "Direction parameter required"}), 400
+    if 'speed' not in request.json:
+        return jsonify({"success": False, "error": "Speed parameter required"}), 400
+    
+    direction = request.json['direction']
+    speed_value = float(request.json['speed'])
+    original_speed = speed_value
+    
+    if direction not in ['forward', 'reverse']:
+        return jsonify({"success": False, "error": "Direction must be 'forward' or 'reverse'"}), 400
+    
+    abs_speed = abs(speed_value)
+    if direction == 'forward':
+        target_speed = abs_speed
+    else:
+        target_speed = -abs_speed
+    
+    success, _ = belt_controller.set_belt_speed(target_speed)
+    
+    if success:
+        response = {
+            "success": True,
+            "message": f"Belt moving in {direction} direction at speed {abs_speed}",
+            "direction": direction,
+            "speed": abs_speed
+        }
+        if original_speed < 0:
+            response["note"] = f"Input speed was negative ({original_speed}), absolute value ({abs_speed}) was used"
+            
+        return jsonify(response)
+    else:
+        return jsonify({"success": False, "error": "Failed to control belt movement"}), 500
+
+@app.route('/api/belt/status', methods=['GET'])
+def get_belt_status():
+    """Get the current status of the conveyor belt"""
+    with belt_lock:
+        speed = belt_status["current_speed"]
+        direction = "forward" if speed >= 0 else "reverse"
+        status = "running" if abs(speed) > 0.0 else "stopped"
+        
+        from collections import OrderedDict
+        response_data = OrderedDict([
+            ("direction", direction),
+            ("status", status),
+            ("raw_speed", speed),
+            ("speed", abs(speed)),
+            ("last_updated", belt_status["last_updated"]),
+            ("timestamp", time.time())
+        ])
+        
+        return Response(
+            json.dumps(response_data),
+            mimetype='application/json'
+        )
+
+@app.route('/api/ned/status', methods=['GET'])
+def get_ned_status():
+    """API endpoint to get the status of the Ned arm"""
+    with ned_lock:
+        is_moving = ned_status["moving"]
+        positions = ned_status["joint_positions"]
+        gripper_position = ned_status["gripper_position"]
+        last_updated = ned_status["last_updated"]
+        
+        return jsonify({
+            "moving": is_moving,
+            "joint_positions": positions,
+            "gripper_position": gripper_position,
+            "last_updated": last_updated,
+            "timestamp": time.time()
+        })
+
+@app.route('/api/ned/movements', methods=['GET'])
+def get_ned_movements():
+    """API endpoint to get available predefined movements"""
+    return jsonify({
+        "available_movements": list(ned_movements.keys())
+    })
+
+@app.route('/api/ned/sequences', methods=['GET'])
+def get_ned_sequences():
+    """API endpoint to get available custom sequences"""
+    global ned_controller
+    
+    return jsonify({
+        "available_sequences": list(ned_controller.custom_sequences.keys())
+    })
+
+@app.route('/api/ned/movements', methods=['POST'])
+def add_ned_movement():
+    """API endpoint to create a new custom movement"""
+    if not request.json:
+        return jsonify({"success": False, "error": "JSON payload required"}), 400
+    
+    if 'name' not in request.json or 'joint_positions' not in request.json:
+        return jsonify({
+            "success": False,
+            "error": "Missing required fields: 'name' and 'joint_positions'"
+        }), 400
+    
+    try:
+        name = request.json['name']
+        positions = request.json['joint_positions']
+        
+        if len(positions) != 6:
+            return jsonify({
+                "success": False,
+                "error": f"Expected 6 joint positions, got {len(positions)}"
+            }), 400
+            
+        positions = [float(p) for p in positions]
+        
+        ned_movements[name] = positions
+        
+        return jsonify({
+            "success": True,
+            "message": f"Added new movement: {name}",
+            "joint_positions": positions
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Error adding movement: {str(e)}"
+        }), 400
+
+@app.route('/api/ned/sequences', methods=['POST'])
+def add_ned_sequence():
+    """API endpoint to create a new movement sequence"""
+    global ned_controller
+    
+    if not request.json:
+        return jsonify({"success": False, "error": "JSON payload required"}), 400
+    
+    if 'name' not in request.json or 'sequence' not in request.json:
+        return jsonify({
+            "success": False,
+            "error": "Missing required fields: 'name' and 'sequence'"
+        }), 400
+    
+    try:
+        name = request.json['name']
+        sequence = request.json['sequence']
+        
+        for step in sequence:
+            if 'action' not in step:
+                return jsonify({
+                    "success": False,
+                    "error": f"Missing 'action' in step: {step}"
+                }), 400
+                
+            if step['action'] == 'move':
+                if 'movement' not in step and 'joint_positions' not in step:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Move action requires 'movement' or 'joint_positions': {step}"
+                    }), 400
+                    
+                if 'movement' in step and step['movement'] not in ned_movements:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Unknown movement: {step['movement']}",
+                        "available_movements": list(ned_movements.keys())
+                    }), 400
+                    
+                if 'joint_positions' in step and len(step['joint_positions']) != 6:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Expected 6 joint positions, got {len(step['joint_positions'])}"
+                    }), 400
+                    
+            elif step['action'] == 'gripper':
+                if 'position' not in step:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Gripper action requires 'position': {step}"
+                    }), 400
+        
+        ned_controller.custom_sequences[name] = sequence
+        
+        return jsonify({
+            "success": True,
+            "message": f"Added new sequence: {name}",
+            "sequence": sequence
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Error adding sequence: {str(e)}"
+        }), 400
+
+@app.route('/api/ned/execute_sequence', methods=['POST'])
+def execute_ned_sequence():
+    """API endpoint to execute a movement sequence"""
+    global ned_controller
+    
+    if not request.json:
+        return jsonify({"success": False, "error": "JSON payload required"}), 400
+    
+    if 'sequence_name' not in request.json and 'sequence' not in request.json:
+        return jsonify({
+            "success": False,
+            "error": "Missing required field: 'sequence_name' or 'sequence'"
+        }), 400
+    
+    try:
+        if 'sequence_name' in request.json:
+            sequence_name = request.json['sequence_name']
+            if sequence_name not in ned_controller.custom_sequences:
+                return jsonify({
+                    "success": False,
+                    "error": f"Unknown sequence: {sequence_name}",
+                    "available_sequences": list(ned_controller.custom_sequences.keys())
+                }), 400
+                
+            success = ned_controller.execute_sequence(sequence_name)
+            
+            if success:
+                return jsonify({
+                    "success": True,
+                    "message": f"Executing sequence: {sequence_name}"
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "Failed to execute sequence"
+                }), 500
+                
+        elif 'sequence' in request.json:
+            sequence = request.json['sequence']
+            ned_controller.execute_movement_sequence(sequence)
+            
+            return jsonify({
+                "success": True,
+                "message": "Executing custom sequence"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Error executing sequence: {str(e)}"
+        }), 400
+
+@app.route('/api/ned/move', methods=['POST'])
+def move_ned_arm():
+    """API endpoint to move the Ned arm"""
+    global ned_controller
+    
+    if not request.json:
+        return jsonify({"success": False, "error": "JSON payload required"}), 400
+    
+    if 'movement' in request.json:
+        movement_name = request.json['movement']
+        if movement_name not in ned_movements:
+            return jsonify({
+                "success": False, 
+                "error": f"Unknown movement: {movement_name}",
+                "available_movements": list(ned_movements.keys())
+            }), 400
+        
+        if ned_controller.execute_predefined_movement(movement_name):
+            return jsonify({
+                "success": True,
+                "message": f"Executing movement: {movement_name}",
+                "joint_positions": ned_movements[movement_name]
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to execute movement"
+            }), 500
+    
+    elif 'joint_positions' in request.json:
+        try:
+            positions = request.json['joint_positions']
+            if len(positions) != 6:
+                return jsonify({
+                    "success": False,
+                    "error": f"Expected 6 joint positions, got {len(positions)}"
+                }), 400
+            
+            positions = [float(p) for p in positions]
+            
+            if ned_controller.send_joint_command(positions):
+                return jsonify({
+                    "success": True,
+                    "message": "Executing joint command",
+                    "joint_positions": positions
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "Failed to send joint command"
+                }), 500
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "error": f"Error processing joint positions: {str(e)}"
+            }), 400
+    
+    elif 'gripper_position' in request.json:
+        try:
+            position = float(request.json['gripper_position'])
+            
+            if ned_controller.send_gripper_command(position):
+                return jsonify({
+                    "success": True,
+                    "message": f"Setting gripper position to {position}",
+                    "gripper_position": position
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "Failed to send gripper command"
+                }), 500
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "error": f"Error processing gripper position: {str(e)}"
+            }), 400
+    
+    else:
+        return jsonify({
+            "success": False,
+            "error": "Missing required field: 'movement', 'joint_positions', or 'gripper_position'"
+        }), 400
+
+@app.route('/api/operation/pickup', methods=['POST'])
+def start_pickup_operation():
+    """Start a coordinated operation to pick up a box from an AMR and place it on the conveyor belt"""
+    global operation_handler
+    
+    if not operation_handler:
+        return jsonify({
+            "error": "Operation handler not initialized",
+            "status": "failed"
+        }), 500
+    
+    data = request.json
+    
+    if not data:
+        return jsonify({"error": "Missing request body"}), 400
+    
+    if 'amr_id' not in data:
+        return jsonify({"error": "Missing required field: amr_id"}), 400
+    
+    amr_id = data['amr_id']
+    
+    success, message = operation_handler.start_operation(amr_id)
+    
+    if success:
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "amr_id": amr_id,
+            "operation_state": "starting"
+        })
+    else:
+        return jsonify({
+            "error": message,
+            "status": "failed"
+        }), 500
+
+@app.route('/api/operation/status', methods=['GET'])
+def get_operation_status():
+    """Get the status of the current pickup and place operation"""
+    global operation_handler
+    
+    if not operation_handler:
+        return jsonify({
+            "error": "Operation handler not initialized",
+            "status": "failed"
+        }), 500
+    
+    status = operation_handler.get_operation_status()
+    
+    return jsonify(status)
+
+@app.route('/api/operation/stop', methods=['POST'])
+def stop_operation():
+    """Stop the current pickup and place operation"""
+    global operation_handler
+    
+    if not operation_handler:
+        return jsonify({
+            "error": "Operation handler not initialized",
+            "status": "failed"
+        }), 500
+    
+    if operation_handler.stop_operation():
+        return jsonify({
+            "status": "success",
+            "message": "Operation stopped successfully"
+        })
+    else:
+        return jsonify({
+            "error": "Failed to stop operation",
+            "status": "failed"
+        }), 500
+
 @app.route('/api/orchestrate-pickup', methods=['POST'])
 def orchestrate_pickup():
     """
@@ -1015,7 +1526,7 @@ def orchestrate_pickup():
         "status_endpoint": "/api/orchestrate-pickup/status",
         "cancel_endpoint": "/api/orchestrate-pickup/cancel"
     })
-# this one is used to get the status of the orchestration
+
 @app.route('/api/orchestrate-pickup/status', methods=['GET'])
 def get_orchestration_status():
     """Get the current status of the pickup orchestration"""
@@ -1062,204 +1573,6 @@ def cancel_orchestration():
         "message": f"Orchestration cancellation requested for {robot_id}",
         "note": "The orchestration will be cancelled soon"
     })
-####################################################################### END OF TESTING API #######################################################################
-
-################################################################### START OF INDIVIDUAL COMPONENT APIs ####################################################################
-# This one is used to move the AMR to a specified coordinates
-@app.route('/api/movement/AMR', methods=['POST'])
-def move_amr():
-    """
-    API endpoint to move the AMR to specified coordinates
-    
-    Expected JSON payload:
-    {
-        "robot_id": "AMR",  // Robot ID to move
-        "x": 1.0,           // Target X coordinate
-        "y": 0.0,           // Target Y coordinate
-        "z": 0.0            // Target Z coordinate
-    }
-    """
-    global navigator_node
-    
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    # Validate required fields
-    required_fields = ['robot_id', 'x', 'y', 'z']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-    
-    robot_id = data['robot_id']
-    target_x = float(data['x'])
-    target_y = float(data['y'])
-    target_z = float(data['z'])
-    
-    with status_lock:
-        if robot_id not in robot_status:
-            return jsonify({
-                "success": False,
-                "error": f"Robot {robot_id} not found",
-                "available_robots": list(robot_status.keys())
-            }), 404
-            
-    if navigator_node and navigator_node.start_navigation_to_coordinates(robot_id, target_x, target_y, target_z):
-        return jsonify({
-            "success": True,
-            "message": f"Robot {robot_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z})",
-            "robot_id": robot_id,
-            "target_position": {"x": target_x, "y": target_y, "z": target_z}
-        })
-    else:
-        return jsonify({
-            "success": False,
-            "error": "Failed to start navigation",
-            "status": "failed"
-        }), 500
-
-@app.route('/api/movement/robotic_arm', methods=['POST'])
-def move_robotic_arm():
-    """
-    API endpoint to control the Ned robotic arm
-    
-    Expected JSON payload:
-    {
-        "sequence": [
-            {"action": "move", "movement": "home", "delay": 1.0},
-            {"action": "gripper", "position": 1.0, "delay": 0.5},
-            {"action": "move", "joint_positions": [0.0, 0.3, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
-            // More steps as needed
-        ]
-    }
-    """
-    global ned_controller
-    
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    if 'sequence' not in data:
-        return jsonify({
-            "success": False, 
-            "error": "Missing required field: 'sequence'"
-        }), 400
-    
-    try:
-        sequence = data['sequence']
-        
-        # Validate the sequence
-        for step in sequence:
-            if 'action' not in step:
-                return jsonify({
-                    "success": False,
-                    "error": f"Missing 'action' in step: {step}"
-                }), 400
-                
-            if step['action'] == 'move':
-                if 'movement' not in step and 'joint_positions' not in step:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Move action requires 'movement' or 'joint_positions': {step}"
-                    }), 400
-                    
-                if 'movement' in step and step['movement'] not in ned_movements:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Unknown movement: {step['movement']}",
-                        "available_movements": list(ned_movements.keys())
-                    }), 400
-                    
-                if 'joint_positions' in step and len(step['joint_positions']) != 6:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Expected 6 joint positions, got {len(step['joint_positions'])}"
-                    }), 400
-                    
-            elif step['action'] == 'gripper':
-                if 'position' not in step:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Gripper action requires 'position': {step}"
-                    }), 400
-        
-        # Execute the sequence
-        ned_controller.execute_movement_sequence(sequence)
-        
-        return jsonify({
-            "success": True,
-            "message": "Executing custom movement sequence",
-            "sequence_length": len(sequence)
-        })
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": f"Error executing sequence: {str(e)}"
-        }), 400
-
-# This one is used to control the conveyor belt
-@app.route('/api/movement/conveyor_belt', methods=['POST'])
-def control_conveyor_belt():
-    """
-    API endpoint to control the conveyor belt
-    
-    Expected JSON payload:
-    {
-        "speed": 0.5,            // Speed value (positive number)
-        "direction": "forward",  // "forward" or "reverse"
-        "running": true          // true to run the belt, false to stop it
-    }
-    """
-    global belt_controller
-    
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    # Validate required fields
-    required_fields = ['speed', 'direction', 'running']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-    
-    try:
-        speed_value = float(data['speed'])
-        direction = data['direction']
-        running = bool(data['running'])
-        
-        if direction not in ['forward', 'reverse']:
-            return jsonify({"success": False, "error": "Direction must be 'forward' or 'reverse'"}), 400
-        
-        if not running:
-            # Stop the belt
-            success, _ = belt_controller.set_belt_speed(0.0)
-            if success:
-                return jsonify({
-                    "success": True,
-                    "message": "Belt stopped"
-                })
-            else:
-                return jsonify({"success": False, "error": "Failed to stop belt"}), 500
-        else:
-            # Set the belt speed and direction
-            abs_speed = abs(speed_value)
-            target_speed = abs_speed if direction == 'forward' else -abs_speed
-            
-            success, _ = belt_controller.set_belt_speed(target_speed)
-            
-            if success:
-                return jsonify({
-                    "success": True,
-                    "message": f"Belt moving in {direction} direction at speed {abs_speed}",
-                    "direction": direction,
-                    "speed": abs_speed,
-                    "running": running
-                })
-            else:
-                return jsonify({"success": False, "error": "Failed to control belt movement"}), 500
-    except ValueError:
-        return jsonify({"success": False, "error": "Invalid speed value"}), 400
 
 def run_flask_server():
     """Run the Flask server"""
