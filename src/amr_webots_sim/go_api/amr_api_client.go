@@ -15,13 +15,6 @@ const (
 	baseURL = "http://localhost:5000/api"
 )
 
-type OrchestrationStatusResponse struct {
-	Active      bool    `json:"active"`
-	State       string  `json:"state"`
-	RobotID     string  `json:"robot_id"`
-	LastUpdated float64 `json:"last_updated"`
-}
-
 type AMRClient struct {
 	httpClient *http.Client
 }
@@ -79,23 +72,6 @@ func (c *AMRClient) makeRequest(method, endpoint string, requestBody interface{}
 	return nil
 }
 
-func (c *AMRClient) GetOrchestrationStatus() (*OrchestrationStatusResponse, error) {
-	status := &OrchestrationStatusResponse{}
-	err := c.makeRequest("GET", "/orchestrate-pickup/status", nil, status)
-	return status, err
-}
-
-func (c *AMRClient) StartOrchestrationPickup(robotID string) error {
-	reqBody := map[string]string{
-		"robot_id": robotID,
-	}
-	return c.makeRequest("POST", "/orchestrate-pickup", reqBody, nil)
-}
-
-func (c *AMRClient) CancelOrchestrationPickup() error {
-	return c.makeRequest("POST", "/orchestrate-pickup/cancel", nil, nil)
-}
-
 func (c *AMRClient) MoveAMR(robotID string, x, y, z float64) error {
 	reqBody := map[string]interface{}{
 		"robot_id": robotID,
@@ -133,13 +109,6 @@ func (c *AMRClient) ControlConveyorBelt(speed float64, direction string, running
 func main() {
 	client := NewAMRClient()
 
-	orchestrationCmd := flag.NewFlagSet("orchestrate", flag.ExitOnError)
-	orchestrationRobotID := orchestrationCmd.String("robot", "", "Robot ID for orchestration")
-
-	statusCmd := flag.NewFlagSet("status", flag.ExitOnError)
-
-	cancelCmd := flag.NewFlagSet("cancel", flag.ExitOnError)
-
 	moveAMRCmd := flag.NewFlagSet("move-amr", flag.ExitOnError)
 	moveRobotID := moveAMRCmd.String("robot", "", "Robot ID to move")
 	x := moveAMRCmd.Float64("x", 0.0, "Target X coordinate")
@@ -155,43 +124,11 @@ func main() {
 	beltRunning := beltCmd.Bool("running", true, "Belt running state (true/false)")
 
 	if len(os.Args) < 2 {
-		fmt.Println("Expected subcommand: orchestrate, status, cancel, move-amr, move-arm, or belt")
+		fmt.Println("Expected subcommand: move-amr, move-arm, or belt")
 		os.Exit(1)
 	}
 
 	switch os.Args[1] {
-	case "orchestrate":
-		orchestrationCmd.Parse(os.Args[2:])
-		if *orchestrationRobotID == "" {
-			fmt.Println("Robot ID is required for orchestration")
-			os.Exit(1)
-		}
-		err := client.StartOrchestrationPickup(*orchestrationRobotID)
-		if err != nil {
-			fmt.Printf("Error starting orchestration: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("Started orchestration with robot %s\n", *orchestrationRobotID)
-
-	case "status":
-		statusCmd.Parse(os.Args[2:])
-		status, err := client.GetOrchestrationStatus()
-		if err != nil {
-			fmt.Printf("Error getting status: %v\n", err)
-			os.Exit(1)
-		}
-		jsonOutput, _ := json.MarshalIndent(status, "", "  ")
-		fmt.Println(string(jsonOutput))
-
-	case "cancel":
-		cancelCmd.Parse(os.Args[2:])
-		err := client.CancelOrchestrationPickup()
-		if err != nil {
-			fmt.Printf("Error canceling orchestration: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Println("Orchestration canceled successfully")
-
 	case "move-amr":
 		moveAMRCmd.Parse(os.Args[2:])
 		if *moveRobotID == "" {
@@ -247,7 +184,7 @@ func main() {
 		}
 
 	default:
-		fmt.Println("Expected subcommand: orchestrate, status, cancel, move-amr, move-arm, or belt")
+		fmt.Println("Expected subcommand: move-amr, move-arm, or belt")
 		os.Exit(1)
 	}
 } 
