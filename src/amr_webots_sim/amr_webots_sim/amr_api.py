@@ -1261,6 +1261,61 @@ def control_conveyor_belt():
     except ValueError:
         return jsonify({"success": False, "error": "Invalid speed value"}), 400
 
+@app.route('/api/status/<robot_id>', methods=['GET'])
+def get_status(robot_id):
+    """API endpoint to get the status of a specific AMR robot"""
+    with status_lock:
+        if robot_id in robot_status:
+            status = robot_status[robot_id]
+            
+            nav_info = {}
+            with nav_lock:
+                if robot_id in nav_status:
+                    robot_nav = nav_status[robot_id]
+                    nav_info = {
+                        "active": robot_nav["active"],
+                        "status": robot_nav["status"]
+                    }
+                    
+                    if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
+                        nav_info["target_coordinates"] = robot_nav["target_coordinates"]
+            
+            velocities = None
+            if "velocities" in status:
+                velocities = status["velocities"]
+            
+            return jsonify({
+                "robot_id": robot_id,
+                "position": status["position"],
+                "orientation": status["orientation"],
+                "moving": status["moving"],
+                "last_updated": status["last_updated"],
+                "navigation": nav_info,
+                "velocities": velocities
+            })
+        else:
+            return jsonify({
+                "error": f"Robot {robot_id} not found",
+                "available_robots": list(robot_status.keys())
+            }), 404
+
+@app.route('/api/ned/status', methods=['GET'])
+def get_ned_status():
+    """API endpoint to get the status of the Ned arm"""
+    with ned_lock:
+        is_moving = ned_status["moving"]
+        positions = ned_status["joint_positions"]
+        gripper_position = ned_status["gripper_position"]
+        last_updated = ned_status["last_updated"]
+        
+        return jsonify({
+            "moving": is_moving,
+            "joint_positions": positions,
+            "gripper_position": gripper_position,
+            "last_updated": last_updated,
+            "timestamp": time.time()
+        })
+
 def run_flask_server():
     """Run the Flask server"""
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -29,7 +29,6 @@ belt_status = {
     "last_updated": time.time()
 }
 belt_lock = threading.Lock()
-belt_controller = None
 
 ned_status = {
     "moving": False,
@@ -39,65 +38,8 @@ ned_status = {
 }
 ned_lock = threading.Lock()
 
-pickup_operation = {
-    "active": False,
-    "amr_id": None,
-    "state": "idle",
-    "start_time": None,
-    "error": None,
-    "last_updated": time.time()
-}
-pickup_lock = threading.Lock()
-
-orchestration_status = {
-    "active": False,
-    "state": "idle",
-    "robot_id": None,
-    "step": None,
-    "error": None,
-    "start_time": None,
-    "last_updated": time.time()
-}
-orchestration_lock = threading.Lock()
-
-PICKUP_POSITIONS = {
-    "amr_position": {"x": 0.237, "y": 0.0, "z": 0.0},
-    "conveyor_position": {"x": -0.5, "y": 0.0, "z": 0.0},
-}
-
-PICKUP_SEQUENCE = [
-    {"action": "move", "movement": "home", "delay": 1.0},
-    {"action": "gripper", "position": 1.0, "delay": 0.5},    # Open gripper wide
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.97, 0.0, 0.0, 0.0], "delay": 1.5},
-    
-    {"action": "move", "joint_positions": [1.57, 0.09, 0.97, 0.0, 0.0, 0.0], "delay": 2.0},
-    
-    {"action": "gripper", "position": -1.4, "delay": 1.5},
-    
-    {"action": "wait", "delay": 1.0},
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 1.5},
-    
-    {"action": "move", "joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 5},
-
-    {"action": "gripper", "position": 0.8, "delay": 0.5},
-    
-    {"action": "wait", "delay": 1.0},
-    
-    {"action": "move", "movement": "home", "delay": 1.0}
-]
-
 position_tolerance = 0.01
 collision_distance = 0
-
-OPTIMAL_PICKUP_POSITION = {
-    "x": 1.0,
-    "y": 0.0,
-    "z": 0.0
-}
 
 ned_movements = {
     "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -107,14 +49,6 @@ ned_movements = {
     "left": [-0.785, 0.0, 0.0, 0.0, 0.0, 0.0],
     "right": [0.785, 0.0, 0.0, 0.0, 0.0, 0.0],
     "wave": [0.0, 0.3, 0.0, 0.0, 0.5, 0.0],
-    
-    "pre_pickup": [0.0, 0.4, -0.2, 0.0, 0.0, 0.0],
-    "approach_box": [0.0, 0.5, -0.4, 0.0, 0.2, 0.0],
-    "grasp_position": [0.0, 0.6, -0.6, 0.0, 0.4, 0.0],
-    "lift_box": [0.0, 0.5, -0.3, 0.0, 0.4, 0.0],
-    "rotate_to_conveyor": [1.57, 0.4, -0.3, 0.0, 0.4, 0.0],
-    "position_over_conveyor": [1.57, 0.5, -0.5, 0.0, 0.4, 0.0],
-    
     "pick_ready": [0.0, 0.4, -0.7, 0.0, 0.3, 0.0],
     "grab": [0.0, 0.5, -0.7, 0.0, 0.0, 0.0],
     "side_pick": [1.57, 0.3, -0.5, 0.0, 0.3, 0.0],
@@ -127,133 +61,8 @@ ned_movements = {
     "stretch": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
     "twist": [0.0, 0.2, -0.2, 1.57, 0.0, 0.0],
     "shake": [1.0, 0.2, -0.3, 0.0, 0.5, 1.0],
-    "point": [0.0, 0.0, -0.5, 0.0, 1.0, 0.0],
-    
-    "prepare_for_pickup": [0.0, -0.3, 0.2, 0.0, 0.5, 0.0],
-    "approach_amr": [0.0, -0.5, 0.3, 0.0, 0.8, 0.0],
-    "pickup_position": [0.0, -0.6, 0.4, 0.0, 0.8, 0.0],
-    "lift_from_amr": [0.0, -0.3, 0.1, 0.0, 0.8, 0.0],
-    "rotate_to_belt": [1.57, -0.3, 0.1, 0.0, 0.8, 0.0],
-    "approach_belt": [1.57, -0.4, 0.2, 0.0, 0.8, 0.0],
-    "place_on_belt": [1.57, -0.5, 0.3, 0.0, 0.8, 0.0]
+    "point": [0.0, 0.0, -0.5, 0.0, 1.0, 0.0]
 }
-
-orchestration_thread = None
-should_stop_orchestration = False
-
-def orchestration_worker(robot_id):
-    """Background worker for orchestrating the pickup workflow"""
-    global orchestration_status, navigator_node, ned_controller, belt_controller, should_stop_orchestration
-    
-    try:
-        with orchestration_lock:
-            orchestration_status["state"] = "starting"
-            orchestration_status["step"] = "positioning_amr"
-            orchestration_status["last_updated"] = time.time()
-        
-        amr_pos = PICKUP_POSITIONS["amr_position"]
-        print(f"Starting orchestration: Redirecting {robot_id} to position ({amr_pos['x']}, {amr_pos['y']}, {amr_pos['z']})")
-        
-        if not navigator_node.start_navigation_to_coordinates(robot_id, amr_pos['x'], amr_pos['y'], amr_pos['z']):
-            with orchestration_lock:
-                orchestration_status["state"] = "error"
-                orchestration_status["error"] = "Failed to start navigation"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        position_reached = False
-        timeout = time.time() + 30
-        
-        while time.time() < timeout and not position_reached and not should_stop_orchestration:
-            with status_lock:
-                if robot_id in robot_status:
-                    robot_x = robot_status[robot_id]["position"]["x"]
-                    robot_y = robot_status[robot_id]["position"]["y"]
-                    
-                    distance = math.sqrt((robot_x - amr_pos['x'])**2 + (robot_y - amr_pos['y'])**2)
-                    
-                    if distance < position_tolerance:
-                        position_reached = True
-                        with orchestration_lock:
-                            orchestration_status["state"] = "amr_positioned"
-                            orchestration_status["step"] = "initiating_pickup"
-                            orchestration_status["last_updated"] = time.time()
-            
-            if not position_reached:
-                time.sleep(0.5)
-        
-        if should_stop_orchestration:
-            with orchestration_lock:
-                orchestration_status["state"] = "cancelled"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        if not position_reached:
-            with orchestration_lock:
-                orchestration_status["state"] = "error"
-                orchestration_status["error"] = "Timeout waiting for AMR to reach position"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "executing_pickup"
-            orchestration_status["step"] = "starting_arm_sequence"
-            orchestration_status["last_updated"] = time.time()
-        
-        sequence_name = f"pickup_sequence_{robot_id}_{int(time.time())}"
-        
-        ned_controller.custom_sequences[sequence_name] = PICKUP_SEQUENCE
-        
-        print(f"Executing pickup sequence: {sequence_name}")
-        ned_controller.execute_sequence(sequence_name)
-        
-        with orchestration_lock:
-            orchestration_status["step"] = "waiting_for_sequence_completion"
-            orchestration_status["last_updated"] = time.time()
-            
-        sequence_timeout = time.time() + 30
-        while time.time() < sequence_timeout and ned_controller.sequence_running and not should_stop_orchestration:
-            time.sleep(0.5)
-            
-            with orchestration_lock:
-                orchestration_status["last_updated"] = time.time()
-        
-        if should_stop_orchestration:
-            with orchestration_lock:
-                orchestration_status["state"] = "cancelled"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "starting_conveyor"
-            orchestration_status["step"] = "belt_movement"
-            orchestration_status["last_updated"] = time.time()
-        
-        belt_controller.set_belt_speed(0.25)
-        time.sleep(5.0)
-        belt_controller.set_belt_speed(0.0)
-        
-        if sequence_name in ned_controller.custom_sequences:
-            del ned_controller.custom_sequences[sequence_name]
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "completed"
-            orchestration_status["active"] = False
-            orchestration_status["last_updated"] = time.time()
-        
-        print(f"Orchestration completed successfully for {robot_id}")
-        
-    except Exception as e:
-        print(f"Error in orchestration: {str(e)}")
-        with orchestration_lock:
-            orchestration_status["state"] = "error"
-            orchestration_status["error"] = str(e)
-            orchestration_status["active"] = False
-            orchestration_status["last_updated"] = time.time()
 
 class AMRNavigator(Node):
     """ROS2 node that handles AMR navigation commands"""
@@ -624,7 +433,6 @@ class NedController(Node):
         self.sequence_timer = None
         self.sequence_running = False
         self.movement_queue = []
-        self.custom_sequences = {}
         
         self.get_logger().info("Ned arm API controller initialized")
     
@@ -694,259 +502,58 @@ class NedController(Node):
         
         return self.send_joint_command(ned_movements[movement_name])
     
-    def execute_sequence(self, sequence_name):
-        """Execute a named sequence of movements"""
-        if sequence_name not in self.custom_sequences:
-            self.get_logger().error(f"Sequence '{sequence_name}' not found")
-            return False
-            
-        sequence = self.custom_sequences[sequence_name]
-        self.execute_movement_sequence(sequence)
-        return True
-    
-    def execute_movement_sequence(self, sequence):
-        """Execute a sequence of movements"""
+    def start_movement_sequence(self, sequence=None, delay=1.0):
+        """Start a sequence of movements with a delay between each"""
         if self.sequence_running:
-            self.get_logger().warning("A sequence is already running, cancelling previous sequence")
-            if self.sequence_timer:
-                self.sequence_timer.cancel()
-                
+            self.get_logger().warn("Movement sequence already running")
+            return False
+        
+        if sequence is None:
+            sequence = list(ned_movements.keys())
+        
+        self.movement_queue = list(sequence)
+        self.sequence_delay = delay
         self.sequence_running = True
-        self.movement_queue = sequence.copy()
-        self._process_next_movement()
         
-    def _process_next_movement(self):
-        """Process the next movement in the queue"""
-        if not self.movement_queue:
-            self.sequence_running = False
-            self.get_logger().info("Movement sequence completed")
-            return
-            
-        movement = self.movement_queue.pop(0)
-        success = False
-        
-        if movement["action"] == "move":
-            if "movement" in movement:
-                success = self.execute_predefined_movement(movement["movement"])
-            elif "joint_positions" in movement:
-                success = self.send_joint_command(movement["joint_positions"])
-        elif movement["action"] == "gripper":
-            success = self.send_gripper_command(movement["position"])
-        elif movement["action"] == "wait":
-            success = True
-        
-        delay = movement.get("delay", 1.0)
-        
-        if success:
-            self.sequence_timer = threading.Timer(delay, self._process_next_movement)
-            self.sequence_timer.daemon = True
-            self.sequence_timer.start()
-        else:
-            self.get_logger().error(f"Failed to execute movement: {movement}")
-            self.sequence_running = False
-
-class PickupPlaceOperationHandler:
-    """Handler for coordinating AMR, Ned arm, and conveyor belt for pickup and place operations"""
-    
-    def __init__(self, navigator_node, ned_controller, belt_controller):
-        self.navigator_node = navigator_node
-        self.ned_controller = ned_controller
-        self.belt_controller = belt_controller
-        self.operation_thread = None
-        self.is_running = False
-    
-    def start_operation(self, amr_id):
-        """Start a pickup and place operation with the specified AMR"""
-        with pickup_lock:
-            if pickup_operation["active"]:
-                return False, f"Another operation is active with AMR {pickup_operation['amr_id']}"
-            
-            with status_lock:
-                if amr_id not in robot_status:
-                    return False, f"Robot {amr_id} not found"
-            
-            pickup_operation["active"] = True
-            pickup_operation["amr_id"] = amr_id
-            pickup_operation["state"] = "starting"
-            pickup_operation["start_time"] = time.time()
-            pickup_operation["error"] = None
-            pickup_operation["last_updated"] = time.time()
-        
-        if self.operation_thread and self.operation_thread.is_alive():
-            self.is_running = False
-            self.operation_thread.join(timeout=2.0)
-        
-        self.is_running = True
-        self.operation_thread = threading.Thread(target=self._execute_operation, args=(amr_id,), daemon=True)
-        self.operation_thread.start()
-        
-        return True, f"Pickup and place operation started with AMR {amr_id}"
-    
-    def _execute_operation(self, amr_id):
-        """Execute the pickup and place operation in a separate thread"""
-        try:
-            self._update_state("moving_amr_to_pickup", amr_id)
-            
-            success = self.navigator_node.start_navigation_to_coordinates(
-                amr_id, 
-                OPTIMAL_PICKUP_POSITION["x"], 
-                OPTIMAL_PICKUP_POSITION["y"], 
-                OPTIMAL_PICKUP_POSITION["z"]
-            )
-            
-            if not success:
-                self._update_state("error", amr_id, "Failed to start AMR navigation")
-                return
-            
-            reached_position = False
-            timeout = time.time() + 60
-            
-            while time.time() < timeout and self.is_running:
-                with nav_lock:
-                    if amr_id in nav_status:
-                        if not nav_status[amr_id]["active"] and nav_status[amr_id]["status"] == "reached":
-                            reached_position = True
-                            break
-                
-                time.sleep(0.5)
-            
-            if not reached_position:
-                self._update_state("error", amr_id, "AMR did not reach pickup position in time")
-                return
-            
-            self._update_state("positioning_arm", amr_id)
-            time.sleep(1.0)
-            
-            self.ned_controller.send_gripper_command(1.0)
-            time.sleep(1.0)
-            
-            success = self.ned_controller.send_joint_command(ned_movements["prepare_for_pickup"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to position Ned arm")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("approaching_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["approach_amr"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to approach box")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("grabbing_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["pickup_position"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to reach pickup position")
-                return
-            
-            time.sleep(2.0)
-            
-            self.ned_controller.send_gripper_command(0.05)
-            time.sleep(1.5)
-            
-            self._update_state("lifting_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["lift_from_amr"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to lift box")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("starting_belt", amr_id)
-            self.belt_controller.set_belt_speed(0.25)
-            self.belt_controller.toggle_belt(True)
-            time.sleep(1.0)
-            
-            self._update_state("rotating_to_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["rotate_to_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to rotate to belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("approaching_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["approach_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to approach belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("positioning_over_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["place_on_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to position over belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("releasing_box", amr_id)
-            self.ned_controller.send_gripper_command(1.0)
-            time.sleep(1.5)
-            
-            self._update_state("returning_home", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["home"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to return home")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("completed", amr_id)
-            
-        except Exception as e:
-            self._update_state("error", amr_id, f"Operation error: {str(e)}")
-        
-        finally:
-            self.is_running = False
-    
-    def _update_state(self, state, amr_id, error=None):
-        """Update the operation state with thread safety"""
-        with pickup_lock:
-            pickup_operation["state"] = state
-            pickup_operation["amr_id"] = amr_id
-            pickup_operation["error"] = error
-            pickup_operation["last_updated"] = time.time()
-            
-            if state == "error" or state == "completed":
-                pickup_operation["active"] = False
-    
-    def get_operation_status(self):
-        """Get the current operation status"""
-        with pickup_lock:
-            return {
-                "active": pickup_operation["active"],
-                "amr_id": pickup_operation["amr_id"],
-                "state": pickup_operation["state"],
-                "start_time": pickup_operation["start_time"],
-                "error": pickup_operation["error"],
-                "last_updated": pickup_operation["last_updated"],
-                "elapsed_time": time.time() - pickup_operation["start_time"] if pickup_operation["start_time"] else None
-            }
-    
-    def stop_operation(self):
-        """Stop the current operation"""
-        self.is_running = False
-        
-        with pickup_lock:
-            pickup_operation["active"] = False
-            pickup_operation["state"] = "stopped"
-            pickup_operation["error"] = "Operation manually stopped"
-            pickup_operation["last_updated"] = time.time()
-        
-        if pickup_operation["amr_id"]:
-            self.navigator_node.stop_robot(pickup_operation["amr_id"])
-        
-        self.ned_controller.send_joint_command(ned_movements["home"])
-        
-        self.belt_controller.toggle_belt(False)
+        sequence_thread = threading.Thread(target=self._execute_sequence, daemon=True)
+        sequence_thread.start()
         
         return True
-
-operation_handler = None
+    
+    def stop_movement_sequence(self):
+        """Stop the current movement sequence"""
+        self.sequence_running = False
+        self.movement_queue = []
+        return True
+    
+    def _execute_sequence(self):
+        """Execute the movement sequence in a separate thread"""
+        try:
+            self.send_joint_command(ned_movements["home"])
+            time.sleep(1.0)
+            
+            movements_executed = 0
+            
+            while self.sequence_running and movements_executed < 20:
+                if not self.movement_queue:
+                    self.movement_queue = list(ned_movements.keys())
+                
+                movement = self.movement_queue.pop(0)
+                
+                self.get_logger().info(f"Executing movement {movements_executed+1}/20: {movement}")
+                self.execute_predefined_movement(movement)
+                
+                movements_executed += 1
+                
+                time.sleep(self.sequence_delay)
+            
+            self.send_joint_command(ned_movements["home"])
+            self.sequence_running = False
+            
+            self.get_logger().info("Movement sequence completed")
+        except Exception as e:
+            self.get_logger().error(f"Error executing movement sequence: {str(e)}")
+            self.sequence_running = False
 
 app = Flask(__name__)
 
@@ -1143,169 +750,6 @@ def get_ned_movements():
         "available_movements": list(ned_movements.keys())
     })
 
-@app.route('/api/ned/sequences', methods=['GET'])
-def get_ned_sequences():
-    """API endpoint to get available custom sequences"""
-    global ned_controller
-    
-    return jsonify({
-        "available_sequences": list(ned_controller.custom_sequences.keys())
-    })
-
-@app.route('/api/ned/movements', methods=['POST'])
-def add_ned_movement():
-    """API endpoint to create a new custom movement"""
-    if not request.json:
-        return jsonify({"success": False, "error": "JSON payload required"}), 400
-    
-    if 'name' not in request.json or 'joint_positions' not in request.json:
-        return jsonify({
-            "success": False,
-            "error": "Missing required fields: 'name' and 'joint_positions'"
-        }), 400
-    
-    try:
-        name = request.json['name']
-        positions = request.json['joint_positions']
-        
-        if len(positions) != 6:
-            return jsonify({
-                "success": False,
-                "error": f"Expected 6 joint positions, got {len(positions)}"
-            }), 400
-            
-        positions = [float(p) for p in positions]
-        
-        ned_movements[name] = positions
-        
-        return jsonify({
-            "success": True,
-            "message": f"Added new movement: {name}",
-            "joint_positions": positions
-        })
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": f"Error adding movement: {str(e)}"
-        }), 400
-
-@app.route('/api/ned/sequences', methods=['POST'])
-def add_ned_sequence():
-    """API endpoint to create a new movement sequence"""
-    global ned_controller
-    
-    if not request.json:
-        return jsonify({"success": False, "error": "JSON payload required"}), 400
-    
-    if 'name' not in request.json or 'sequence' not in request.json:
-        return jsonify({
-            "success": False,
-            "error": "Missing required fields: 'name' and 'sequence'"
-        }), 400
-    
-    try:
-        name = request.json['name']
-        sequence = request.json['sequence']
-        
-        for step in sequence:
-            if 'action' not in step:
-                return jsonify({
-                    "success": False,
-                    "error": f"Missing 'action' in step: {step}"
-                }), 400
-                
-            if step['action'] == 'move':
-                if 'movement' not in step and 'joint_positions' not in step:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Move action requires 'movement' or 'joint_positions': {step}"
-                    }), 400
-                    
-                if 'movement' in step and step['movement'] not in ned_movements:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Unknown movement: {step['movement']}",
-                        "available_movements": list(ned_movements.keys())
-                    }), 400
-                    
-                if 'joint_positions' in step and len(step['joint_positions']) != 6:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Expected 6 joint positions, got {len(step['joint_positions'])}"
-                    }), 400
-                    
-            elif step['action'] == 'gripper':
-                if 'position' not in step:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Gripper action requires 'position': {step}"
-                    }), 400
-        
-        ned_controller.custom_sequences[name] = sequence
-        
-        return jsonify({
-            "success": True,
-            "message": f"Added new sequence: {name}",
-            "sequence": sequence
-        })
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": f"Error adding sequence: {str(e)}"
-        }), 400
-
-@app.route('/api/ned/execute_sequence', methods=['POST'])
-def execute_ned_sequence():
-    """API endpoint to execute a movement sequence"""
-    global ned_controller
-    
-    if not request.json:
-        return jsonify({"success": False, "error": "JSON payload required"}), 400
-    
-    if 'sequence_name' not in request.json and 'sequence' not in request.json:
-        return jsonify({
-            "success": False,
-            "error": "Missing required field: 'sequence_name' or 'sequence'"
-        }), 400
-    
-    try:
-        if 'sequence_name' in request.json:
-            sequence_name = request.json['sequence_name']
-            if sequence_name not in ned_controller.custom_sequences:
-                return jsonify({
-                    "success": False,
-                    "error": f"Unknown sequence: {sequence_name}",
-                    "available_sequences": list(ned_controller.custom_sequences.keys())
-                }), 400
-                
-            success = ned_controller.execute_sequence(sequence_name)
-            
-            if success:
-                return jsonify({
-                    "success": True,
-                    "message": f"Executing sequence: {sequence_name}"
-                })
-            else:
-                return jsonify({
-                    "success": False,
-                    "error": "Failed to execute sequence"
-                }), 500
-                
-        elif 'sequence' in request.json:
-            sequence = request.json['sequence']
-            ned_controller.execute_movement_sequence(sequence)
-            
-            return jsonify({
-                "success": True,
-                "message": "Executing custom sequence"
-            })
-            
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": f"Error executing sequence: {str(e)}"
-        }), 400
-
 @app.route('/api/ned/move', methods=['POST'])
 def move_ned_arm():
     """API endpoint to move the Ned arm"""
@@ -1390,189 +834,61 @@ def move_ned_arm():
             "error": "Missing required field: 'movement', 'joint_positions', or 'gripper_position'"
         }), 400
 
-@app.route('/api/operation/pickup', methods=['POST'])
-def start_pickup_operation():
-    """Start a coordinated operation to pick up a box from an AMR and place it on the conveyor belt"""
-    global operation_handler
+@app.route('/api/ned/sequence', methods=['POST'])
+def start_ned_sequence():
+    global ned_controller
     
-    if not operation_handler:
+    if ned_controller.sequence_running:
         return jsonify({
-            "error": "Operation handler not initialized",
-            "status": "failed"
-        }), 500
+            "success": False,
+            "error": "Movement sequence already running"
+        }), 400
     
-    data = request.json
+    delay = 1.0
+    if request.json and 'delay' in request.json:
+        try:
+            delay = float(request.json['delay'])
+            if delay < 0.5:
+                delay = 0.5
+            elif delay > 5.0:
+                delay = 5.0
+        except ValueError:
+            pass
     
-    if not data:
-        return jsonify({"error": "Missing request body"}), 400
-    
-    if 'amr_id' not in data:
-        return jsonify({"error": "Missing required field: amr_id"}), 400
-    
-    amr_id = data['amr_id']
-    
-    success, message = operation_handler.start_operation(amr_id)
-    
-    if success:
+    if ned_controller.start_movement_sequence(delay=delay):
         return jsonify({
-            "status": "success",
-            "message": message,
-            "amr_id": amr_id,
-            "operation_state": "starting"
+            "success": True,
+            "message": "Started movement sequence of 20 movements",
+            "delay": delay,
+            "status_endpoint": "/api/ned/status"
         })
     else:
         return jsonify({
-            "error": message,
-            "status": "failed"
+            "success": False,
+            "error": "Failed to start movement sequence"
         }), 500
 
-@app.route('/api/operation/status', methods=['GET'])
-def get_operation_status():
-    """Get the status of the current pickup and place operation"""
-    global operation_handler
+@app.route('/api/ned/sequence/stop', methods=['POST'])
+def stop_ned_sequence():
+    """API endpoint to stop the current movement sequence"""
+    global ned_controller
     
-    if not operation_handler:
+    if not ned_controller.sequence_running:
         return jsonify({
-            "error": "Operation handler not initialized",
-            "status": "failed"
-        }), 500
+            "success": True,
+            "message": "No movement sequence is currently running"
+        })
     
-    status = operation_handler.get_operation_status()
-    
-    return jsonify(status)
-
-@app.route('/api/operation/stop', methods=['POST'])
-def stop_operation():
-    """Stop the current pickup and place operation"""
-    global operation_handler
-    
-    if not operation_handler:
+    if ned_controller.stop_movement_sequence():
         return jsonify({
-            "error": "Operation handler not initialized",
-            "status": "failed"
-        }), 500
-    
-    if operation_handler.stop_operation():
-        return jsonify({
-            "status": "success",
-            "message": "Operation stopped successfully"
+            "success": True,
+            "message": "Movement sequence stopped"
         })
     else:
         return jsonify({
-            "error": "Failed to stop operation",
-            "status": "failed"
+            "success": False,
+            "error": "Failed to stop movement sequence"
         }), 500
-
-@app.route('/api/orchestrate-pickup', methods=['POST'])
-def orchestrate_pickup():
-    """
-    Orchestrates the entire pickup workflow:
-    1. Position the AMR at the optimal location for the robotic arm
-    2. Execute the robotic arm pickup sequence
-    3. Start the conveyor belt to transport the box
-    
-    This is a composite API that coordinates multiple systems.
-    """
-    global orchestration_thread, should_stop_orchestration, navigator_node, orchestration_status
-    
-    with orchestration_lock:
-        if orchestration_status["active"]:
-            current_state = orchestration_status["state"]
-            return jsonify({
-                "success": False,
-                "error": f"Orchestration already in progress (state: {current_state})",
-                "orchestration_status": orchestration_status
-            }), 409
-    
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    if 'robot_id' not in data:
-        return jsonify({"success": False, "error": "Missing required field: robot_id"}), 400
-    
-    robot_id = data['robot_id']
-    
-    with status_lock:
-        if robot_id not in robot_status:
-            return jsonify({
-                "success": False,
-                "error": f"Robot {robot_id} not found",
-                "available_robots": list(robot_status.keys())
-            }), 404
-    
-    with orchestration_lock:
-        orchestration_status["active"] = True
-        orchestration_status["state"] = "initializing"
-        orchestration_status["robot_id"] = robot_id
-        orchestration_status["step"] = "startup"
-        orchestration_status["error"] = None
-        orchestration_status["start_time"] = time.time()
-        orchestration_status["last_updated"] = time.time()
-    
-    should_stop_orchestration = False
-    
-    orchestration_thread = threading.Thread(
-        target=orchestration_worker,
-        args=(robot_id,),
-        daemon=True
-    )
-    orchestration_thread.start()
-    
-    return jsonify({
-        "success": True,
-        "message": f"Orchestration started for {robot_id}",
-        "robot_id": robot_id,
-        "status_endpoint": "/api/orchestrate-pickup/status",
-        "cancel_endpoint": "/api/orchestrate-pickup/cancel"
-    })
-
-@app.route('/api/orchestrate-pickup/status', methods=['GET'])
-def get_orchestration_status():
-    """Get the current status of the pickup orchestration"""
-    with orchestration_lock:
-        status_copy = dict(orchestration_status)
-        status_copy["timestamp"] = time.time()
-        
-        if status_copy["start_time"]:
-            status_copy["elapsed_seconds"] = time.time() - status_copy["start_time"]
-        
-        return jsonify(status_copy)
-
-@app.route('/api/orchestrate-pickup/cancel', methods=['POST'])
-def cancel_orchestration():
-    """Cancel the current pickup orchestration"""
-    global should_stop_orchestration
-    
-    with orchestration_lock:
-        if not orchestration_status["active"]:
-            return jsonify({
-                "success": True,
-                "message": "No orchestration is currently active"
-            })
-        
-        robot_id = orchestration_status["robot_id"]
-    
-    should_stop_orchestration = True
-    
-    if navigator_node and robot_id:
-        navigator_node.stop_robot(robot_id)
-    
-    if ned_controller:
-        if ned_controller.sequence_running and ned_controller.sequence_timer:
-            ned_controller.sequence_timer.cancel()
-        ned_controller.sequence_running = False
-        ned_controller.movement_queue = []
-        ned_controller.send_joint_command(ned_movements["home"])
-    
-    if belt_controller:
-        belt_controller.set_belt_speed(0.0)
-    
-    return jsonify({
-        "success": True,
-        "message": f"Orchestration cancellation requested for {robot_id}",
-        "note": "The orchestration will be cancelled soon"
-    })
 
 def run_flask_server():
     """Run the Flask server"""
