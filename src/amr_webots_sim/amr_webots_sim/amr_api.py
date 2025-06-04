@@ -1318,22 +1318,7 @@ def get_ned_status():
 
 def run_flask_server(host='0.0.0.0', port=5000):
     """Run the Flask server"""
-    try:
-        # Always bind to 0.0.0.0 which means "all interfaces"
-        bind_host = '0.0.0.0'
-        
-        # If a hostname was specified, set it as SERVER_NAME for external URL generation
-        # but still bind to a valid IP address
-        if host != '0.0.0.0':
-            app.config['SERVER_NAME'] = f"{host}:{port}"
-            print(f"Server will be accessible at: http://{host}:{port}")
-        
-        app.run(host=bind_host, port=port, debug=False)
-    except Exception as e:
-        print(f"Error starting Flask server: {str(e)}")
-        # Fallback to binding to all interfaces if there was an error
-        print("Falling back to binding on all interfaces (0.0.0.0)")
-        app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host=host, port=port, debug=False)
 
 def main(host='0.0.0.0', port=5000):
     """Main function to start ROS nodes and Flask server"""
