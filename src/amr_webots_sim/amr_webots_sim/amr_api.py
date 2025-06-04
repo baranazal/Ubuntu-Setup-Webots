@@ -1316,11 +1316,11 @@ def get_ned_status():
             "timestamp": time.time()
         })
 
-def run_flask_server():
+def run_flask_server(host='0.0.0.0', port=5000):
     """Run the Flask server"""
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host=host, port=port, debug=False)
 
-def main():
+def main(host='0.0.0.0', port=5000):
     """Main function to start ROS nodes and Flask server"""
     rclpy.init()
     
@@ -1343,10 +1343,20 @@ def main():
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
     
-    run_flask_server()
+    run_flask_server(host, port)
     
     executor.shutdown()
     rclpy.shutdown()
 
 if __name__ == '__main__':
-    main() 
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='AMR API Server')
+    parser.add_argument('--host', default='0.0.0.0', 
+                        help='Host address to bind to (default: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=5000, 
+                        help='Port to listen on (default: 5000)')
+    
+    args = parser.parse_args()
+    
+    main(host=args.host, port=args.port) 
