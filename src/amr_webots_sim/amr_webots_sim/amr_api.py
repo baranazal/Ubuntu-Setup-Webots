@@ -263,7 +263,7 @@ class AMRNavigator(Node):
         
         self.cmd_vel_publishers = {}
         
-        robot_names = ["AMR", "AMR2", "AMR3", "AMR4", "AMR5"]
+        robot_names = ["AMR"]
         
         for robot_name in robot_names:
             qos = QoSProfile(depth=10)
@@ -471,7 +471,7 @@ class AMRStatusMonitor(Node):
         super().__init__('amr_status_monitor')
         
         self.odom_subscribers = {}
-        robot_names = ["AMR", "AMR2", "AMR3", "AMR4", "AMR5"]
+        robot_names = ["AMR"]
         
         for robot_name in robot_names:
             with status_lock:
@@ -1098,10 +1098,16 @@ def move_amr():
     
     with status_lock:
         if robot_id not in robot_status:
+            available_robots = list(robot_status.keys())
+            if len(available_robots) == 0:
+                error_msg = "No robots are currently available in the simulation"
+            else:
+                error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+                
             return jsonify({
                 "success": False,
-                "error": f"Robot {robot_id} not found",
-                "available_robots": list(robot_status.keys())
+                "error": error_msg,
+                "available_robots": available_robots
             }), 404
             
     if navigator_node and navigator_node.start_navigation_to_coordinates(robot_id, target_x, target_y, target_z):
@@ -1294,9 +1300,15 @@ def get_status(robot_id):
                 "velocities": velocities
             })
         else:
+            available_robots = list(robot_status.keys())
+            if len(available_robots) == 0:
+                error_msg = "No robots are currently available in the simulation"
+            else:
+                error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+            
             return jsonify({
-                "error": f"Robot {robot_id} not found",
-                "available_robots": list(robot_status.keys())
+                "error": error_msg,
+                "available_robots": available_robots
             }), 404
 
 @app.route('/api/belt/status', methods=['GET'])
