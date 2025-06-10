@@ -1299,6 +1299,29 @@ def get_status(robot_id):
                 "available_robots": list(robot_status.keys())
             }), 404
 
+@app.route('/api/belt/status', methods=['GET'])
+def get_belt_status():
+    """Get the current status of the conveyor belt"""
+    with belt_lock:
+        speed = belt_status["current_speed"]
+        direction = "forward" if speed >= 0 else "reverse"
+        status = "running" if abs(speed) > 0.0 else "stopped"
+        
+        from collections import OrderedDict
+        response_data = OrderedDict([
+            ("direction", direction),
+            ("status", status),
+            ("raw_speed", speed),
+            ("speed", abs(speed)),
+            ("last_updated", belt_status["last_updated"]),
+            ("timestamp", time.time())
+        ])
+        
+        return Response(
+            json.dumps(response_data),
+            mimetype='application/json'
+        )
+
 @app.route('/api/ned/status', methods=['GET'])
 def get_ned_status():
     """API endpoint to get the status of the Ned arm"""
