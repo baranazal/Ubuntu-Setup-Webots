@@ -263,7 +263,7 @@ class AMRNavigator(Node):
         
         self.cmd_vel_publishers = {}
         
-        robot_names = ["AMR"]
+        robot_names = ["AMR1"]
         
         for robot_name in robot_names:
             qos = QoSProfile(depth=10)
@@ -471,7 +471,7 @@ class AMRStatusMonitor(Node):
         super().__init__('amr_status_monitor')
         
         self.odom_subscribers = {}
-        robot_names = ["AMR"]
+        robot_names = ["AMR1"]
         
         for robot_name in robot_names:
             with status_lock:
@@ -1066,14 +1066,14 @@ def cancel_orchestration():
 
 ################################################################### START OF INDIVIDUAL COMPONENT APIs ####################################################################
 # This one is used to move the AMR to a specified coordinates
-@app.route('/api/movement/AMR', methods=['POST'])
-def move_amr():
+@app.route('/api/movement/AMR1', methods=['POST'])
+def move_amr1():
     """
-    API endpoint to move the AMR to specified coordinates
+    API endpoint to move the AMR1 to specified coordinates
     
     Expected JSON payload:
     {
-        "robot_id": "AMR",  // Robot ID to move
+        "robot_id": "AMR1",  // Robot ID to move
         "x": 1.0,           // Target X coordinate
         "y": 0.0,           // Target Y coordinate
         "z": 0.0            // Target Z coordinate

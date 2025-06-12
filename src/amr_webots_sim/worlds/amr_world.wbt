@@ -84,7 +84,7 @@ Ned {
 AMR {
   translation 1.0 0 0
   rotation 0 0 1 3.14159
-  name "AMR"
+  name "AMR1"
   baseColor 0.2 0.2 0.6
   controller "amr_controller"
 }
