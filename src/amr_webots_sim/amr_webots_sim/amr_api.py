@@ -263,7 +263,7 @@ class AMRNavigator(Node):
         
         self.cmd_vel_publishers = {}
         
-        robot_names = ["AMR"]
+        robot_names = ["AMR1", "AMR2", "AMR3", "AMR4", "AMR5", "AMR6"]
         
         for robot_name in robot_names:
             qos = QoSProfile(depth=10)
@@ -471,7 +471,7 @@ class AMRStatusMonitor(Node):
         super().__init__('amr_status_monitor')
         
         self.odom_subscribers = {}
-        robot_names = ["AMR"]
+        robot_names = ["AMR1", "AMR2", "AMR3", "AMR4", "AMR5", "AMR6"]
         
         for robot_name in robot_names:
             with status_lock:
