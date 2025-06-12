@@ -19,9 +19,9 @@ def generate_launch_description():
     """
     # Get package directory
     try:
-        package_dir = get_package_share_directory('amr_webots_sim')
+        package_dir = get_package_share_directory('agv_demo')
     except Exception as e:
-        print(f"Error: Could not find amr_webots_sim package: {str(e)}")
+        print(f"Error: Could not find agv_demo package: {str(e)}")
         sys.exit(1)
     
     # Check if required files exist
@@ -32,8 +32,8 @@ def generate_launch_description():
         sys.exit(1)
     
     # Check controller files
-    amr_controller = os.path.join(package_dir, 'amr_webots_sim', 'amr_controller.py')
-    ned_controller = os.path.join(package_dir, 'amr_webots_sim', 'ned_controller.py')
+    amr_controller = os.path.join(package_dir, 'agv_demo', 'amr_controller.py')
+    ned_controller = os.path.join(package_dir, 'agv_demo', 'ned_controller.py')
     
     controllers_found = True
     
@@ -106,7 +106,7 @@ def generate_launch_description():
     
     # Launch the Ned ROS2 interface node
     ned_ros2_controller = Node(
-        package='amr_webots_sim',
+        package='agv_demo',
         executable='ned_controller',
         name='ned_ros2_controller',
         output='screen',

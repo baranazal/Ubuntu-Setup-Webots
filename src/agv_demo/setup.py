@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 from glob import glob
 
-package_name = 'amr_webots_sim'
+package_name = 'agv_demo'
 
 # Make sure the scripts directory is treated as a proper package
 packages = [package_name]
@@ -41,9 +41,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'amr_controller = amr_webots_sim.amr_controller:main',
-            'belt_controller = amr_webots_sim.belt_controller:main',
-            'ned_controller = amr_webots_sim.ned_controller:main',
+            'amr_controller = agv_demo.amr_controller:main',
+            'belt_controller = agv_demo.belt_controller:main',
+            'ned_controller = agv_demo.ned_controller:main',
         ],
     },
 )

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>amr_webots_sim</name>
+  <name>agv_demo</name>
   <version>0.1.0</version>
   <description>
     A ROS2 package for simulating Autonomous Mobile Robots (AMRs) with mecanum wheels in Webots.
@@ -11,7 +11,7 @@
   <maintainer email="your_email@example.com">your_name</maintainer>
   <license>Apache License 2.0</license>
   
-  <url type="website">https://github.com/yourusername/amr_webots_sim</url>
+  <url type="website">https://github.com/yourusername/agv_demo</url>
 
   <buildtool_depend>ament_python</buildtool_depend>
   
