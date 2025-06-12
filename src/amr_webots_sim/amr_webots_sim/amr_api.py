@@ -1066,10 +1066,10 @@ def cancel_orchestration():
 
 ################################################################### START OF INDIVIDUAL COMPONENT APIs ####################################################################
 # This one is used to move the AMR to a specified coordinates
-@app.route('/api/movement/AMR1', methods=['POST'])
-def move_amr1():
+@app.route('/api/movement/AMR', methods=['POST'])
+def move_amr():
     """
-    API endpoint to move the AMR1 to specified coordinates
+    API endpoint to move the AMR to specified coordinates
     
     Expected JSON payload:
     {
