@@ -1,0 +1,24 @@
+running develop
+running egg_info
+creating amr_webots_sim.egg-info
+writing amr_webots_sim.egg-info/PKG-INFO
+writing dependency_links to amr_webots_sim.egg-info/dependency_links.txt
+writing entry points to amr_webots_sim.egg-info/entry_points.txt
+writing requirements to amr_webots_sim.egg-info/requires.txt
+writing top-level names to amr_webots_sim.egg-info/top_level.txt
+writing manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+reading manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+writing manifest file 'amr_webots_sim.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/python3.12/site-packages/amr-webots-sim.egg-link (link to .)
+Installing amr_controller script to /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/lib/amr_webots_sim
+
+Installed /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim
+running symlink_data
+creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index
+creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index
+creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index/packages
+symbolically linking /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/resource/amr_webots_sim -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/ament_index/resource_index/packages
+symbolically linking /home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/package.xml -> /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim
+creating /home/bara/ros2_ws/src/amr_webots_sim/install/amr_webots_sim/share/amr_webots_sim/worlds
+error: can't copy '/home/bara/ros2_ws/src/amr_webots_sim/build/amr_webots_sim/worlds/amr_world.wbt': doesn't exist or not a regular file

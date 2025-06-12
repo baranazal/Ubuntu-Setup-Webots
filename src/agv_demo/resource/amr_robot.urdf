@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<!-- AMR Robot URDF Description for Webots ROS2 -->
+<robot name="AMR">
+    <webots>
+        <!-- Front Left Motor -->
+        <device reference="front_left_motor" type="RotationalMotor">
+            <ros>
+                <topicName>front_left_motor</topicName>
+                <commandInterface>velocity</commandInterface>
+                <controllerInterface>velocity</controllerInterface>
+            </ros>
+        </device>
+        
+        <!-- Front Right Motor -->
+        <device reference="front_right_motor" type="RotationalMotor">
+            <ros>
+                <topicName>front_right_motor</topicName>
+                <commandInterface>velocity</commandInterface>
+                <controllerInterface>velocity</controllerInterface>
+            </ros>
+        </device>
+        
+        <!-- Rear Left Motor -->
+        <device reference="rear_left_motor" type="RotationalMotor">
+            <ros>
+                <topicName>rear_left_motor</topicName>
+                <commandInterface>velocity</commandInterface>
+                <controllerInterface>velocity</controllerInterface>
+            </ros>
+        </device>
+        
+        <!-- Rear Right Motor -->
+        <device reference="rear_right_motor" type="RotationalMotor">
+            <ros>
+                <topicName>rear_right_motor</topicName>
+                <commandInterface>velocity</commandInterface>
+                <controllerInterface>velocity</controllerInterface>
+            </ros>
+        </device>
+        
+        <!-- Standard Webots ROS2 controller plugin -->
+        <plugin type="webots_ros2_driver::WebotsController"/>
+    </webots>
+</robot> 

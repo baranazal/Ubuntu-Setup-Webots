@@ -1,0 +1,333 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/CardboardBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/conveyors/protos/ConveyorBelt.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/niryo/ned/protos/Ned.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/PlasticCrate.proto"
+EXTERNPROTO "../worlds/AMR.proto"
+
+WorldInfo {
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material1 "default"
+      material2 "default"
+      coulombFriction [ 0.8 ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.5 0.5 0.7 1.8
+  position 0.5 -5.0 4.5
+}
+TexturedBackground { }
+TexturedBackgroundLight { }
+RectangleArena {
+  floorSize 15 15
+  floorTileSize 0.5 0.5
+  wallHeight 0.3
+}
+
+Robot {
+  name "floor_supervisor"
+  controller "belt_supervisor"
+  supervisor TRUE
+  translation -0.8 0 -0.5
+  children [
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 1 0
+            transparency 1
+          }
+          geometry Box {
+            size 0.1 0.1 0.1
+          }
+        }
+      ]
+      name "supervisor_body"
+    }
+  ]
+}
+
+# Waypoint markers on the floor
+Transform {
+  translation 0 0 0.001
+  children [
+    # Top row - 4 waypoints
+    DEF WAYPOINT1 Solid {
+      translation -3.0 2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint1"
+    }
+    DEF WAYPOINT2 Solid {
+      translation -1.0 2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint2"
+    }
+    DEF WAYPOINT3 Solid {
+      translation 1.0 2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint3"
+    }
+    DEF WAYPOINT4 Solid {
+      translation 3.0 2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint4"
+    }
+    
+    # Middle row - 3 waypoints
+    DEF WAYPOINT5 Solid {
+      translation -2.0 0.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint5"
+    }
+    DEF WAYPOINT6 Solid {
+      translation 0.0 0.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint6"
+    }
+    DEF WAYPOINT7 Solid {
+      translation 2.0 0.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint7"
+    }
+    
+    # Bottom row - 4 waypoints
+    DEF WAYPOINT8 Solid {
+      translation -3.0 -2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint8"
+    }
+    DEF WAYPOINT9 Solid {
+      translation -1.0 -2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint9"
+    }
+    DEF WAYPOINT10 Solid {
+      translation 1.0 -2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint10"
+    }
+    DEF WAYPOINT11 Solid {
+      translation 3.0 -2.0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+            roughness 0.3
+            emissiveIntensity 0.2
+            emissiveColor 1 0 0
+          }
+          geometry Cylinder {
+            height 0.005
+            radius 0.1
+          }
+        }
+      ]
+      name "waypoint11"
+    }
+  ]
+}
+
+# AMR 1 - Top row, second column
+AMR {
+  translation -1.0 2.0 0
+  rotation 0 0 1 0.785398
+  name "AMR1"
+  baseColor 0.2 0.2 0.6
+  controller "amr_controller"
+}
+
+# AMR 2 - Top row, third column
+AMR {
+  translation 1.0 2.0 0
+  rotation 0 0 1 0
+  name "AMR2"
+  baseColor 0.2 0.6 0.2
+  controller "amr_controller"
+}
+
+# AMR 3 - Top row, fourth column
+AMR {
+  translation 3.0 2.0 0
+  rotation 0 0 1 -0.785398
+  name "AMR3"
+  baseColor 0.6 0.2 0.2
+  controller "amr_controller"
+}
+
+# AMR 4 - Bottom row, second column
+AMR {
+  translation -1.0 -2.0 0
+  rotation 0 0 1 1.5708
+  name "AMR4"
+  baseColor 0.6 0.6 0.2
+  controller "amr_controller"
+}
+
+# AMR 5 - Bottom row, third column
+AMR {
+  translation 1.0 -2.0 0
+  rotation 0 0 1 0
+  name "AMR5"
+  baseColor 0.2 0.6 0.6
+  controller "amr_controller"
+}
+
+# AMR 6 - Bottom row, fourth column
+AMR {
+  translation 3.0 -2.0 0
+  rotation 0 0 1 -1.5708
+  name "AMR6"
+  baseColor 0.6 0.2 0.6
+  controller "amr_controller"
+}
+
+# End of world file

@@ -1,0 +1,14 @@
+[
+    {"action": "move", "movement": "home", "delay": 1.0},
+    {"action": "gripper", "position": 1.0, "delay": 0.5},
+    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
+    {"action": "move", "joint_positions": [1.57, 0.0, 0.96, 0.0, 0.0, 0.0], "delay": 1.5},
+    {"action": "move", "joint_positions": [1.57, 0.08, 0.96, 0.0, 0.0, 0.0], "delay": 2.0},
+    {"action": "gripper", "position": -1.4, "delay": 1.5},
+    {"action": "wait", "delay": 1.0},
+    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 1.5},
+    {"action": "move", "joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 5},
+    {"action": "gripper", "position": 0.8, "delay": 0.5},
+    {"action": "wait", "delay": 1.0},
+    {"action": "move", "movement": "home", "delay": 1.0}
+    ]

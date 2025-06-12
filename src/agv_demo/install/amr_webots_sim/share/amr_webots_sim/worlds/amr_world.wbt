@@ -1,0 +1,69 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/CardboardBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "../worlds/AMR.proto"
+
+WorldInfo {
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material1 "default"
+      material2 "default"
+      coulombFriction [ 0.8 ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.5 0.5 0.7 1.8
+  position 0.5 -5.0 4.5
+  follow "AMR"
+}
+TexturedBackground { }
+TexturedBackgroundLight { }
+RectangleArena {
+  floorSize 10 10
+  floorTileSize 0.5 0.5
+  wallHeight 0.3
+}
+
+# AMR robots positioned in a line along the x-axis
+AMR {
+  translation 0 0 0
+  name "AMR"
+  baseColor 0.2 0.2 0.6
+  controller "amr_controller"
+}
+
+AMR {
+  translation 1.0 0 0
+  name "AMR2"
+  baseColor 0.6 0.2 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation 2.0 0 0
+  name "AMR3"
+  baseColor 0.2 0.6 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation -1.0 0 0
+  name "AMR4"
+  baseColor 0.8 0.8 0.2
+  controller "amr_controller"
+}
+
+AMR {
+  translation -2.0 0 0
+  name "AMR5"
+  baseColor 0.6 0.2 0.6
+  controller "amr_controller"
+}
+
+# End of world file

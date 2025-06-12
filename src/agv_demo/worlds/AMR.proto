@@ -1,0 +1,425 @@
+#VRML_SIM R2025a utf8
+
+PROTO AMR [
+  field SFVec3f    translation  0 0 0     # Position
+  field SFRotation rotation     0 0 1 3.14159    # Rotation
+  field SFString   name         "AMR"     # Robot name
+  field SFColor    baseColor    0.2 0.2 0.6    # Base color for chassis
+  field SFString   controller   "amr_controller"  # Controller name
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    name IS name
+    controller IS controller
+    children [
+      # Enhanced Robot Body (Chassis)
+      Transform {
+        translation 0 0 0.075
+        children [
+          # Main chassis body
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS baseColor
+              metalness 0.8
+              roughness 0.3
+            }
+            geometry Box {
+              size 0.2 0.15 0.06
+            }
+          }
+          # Top plate with industrial design
+          Transform {
+            translation 0 0 0.03
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.3 0.3 0.3
+                  metalness 0.9
+                  roughness 0.2
+                }
+                geometry Box {
+                  size 0.19 0.14 0.01
+                }
+              }
+            ]
+          }
+          # Front status LED panel
+          Transform {
+            translation 0.095 0 0.035
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0 0.7 0
+                  emissiveColor 0 0.7 0
+                  metalness 0
+                  roughness 0.2
+                }
+                geometry Box {
+                  size 0.01 0.05 0.01
+                }
+              }
+            ]
+          }
+        ]
+      }
+      
+      # Enhanced Rear Left Mecanum Wheel
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0 1 0
+          anchor -0.075 0.085 0.025
+        }
+        device [
+          RotationalMotor {
+            name "rear_left_motor"
+            maxVelocity 15.0
+            maxTorque 1.0
+          }
+          PositionSensor {
+            name "rear_left_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation -0.075 0.085 0.025
+          rotation 1 0 0 1.5708
+          children [
+            Group {
+              children [
+                # Main wheel hub
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.15 0.15 0.15
+                    metalness 0.8
+                    roughness 0.3
+                  }
+                  geometry Cylinder {
+                    height 0.02
+                    radius 0.0275
+                    subdivision 32
+                  }
+                }
+                # Mecanum rollers (simplified representation)
+                Transform {
+                  rotation 0 0 1 0.785398
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+                Transform {
+                  rotation 0 0 1 2.356194
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+          name "rear_left_wheel"
+          boundingObject Cylinder {
+            height 0.02
+            radius 0.0275
+          }
+          physics Physics {
+            density -1
+            mass 0.075
+          }
+        }
+      }
+      
+      # Enhanced Rear Right Mecanum Wheel
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0 1 0
+          anchor -0.075 -0.085 0.025
+        }
+        device [
+          RotationalMotor {
+            name "rear_right_motor"
+            maxVelocity 15.0
+            maxTorque 1.0
+          }
+          PositionSensor {
+            name "rear_right_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation -0.075 -0.085 0.025
+          rotation 1 0 0 1.5708
+          children [
+            Group {
+              children [
+                # Main wheel hub
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.15 0.15 0.15
+                    metalness 0.8
+                    roughness 0.3
+                  }
+                  geometry Cylinder {
+                    height 0.02
+                    radius 0.0275
+                    subdivision 32
+                  }
+                }
+                # Mecanum rollers (simplified representation)
+                Transform {
+                  rotation 0 0 1 -0.785398
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+                Transform {
+                  rotation 0 0 1 -2.356194
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+          name "rear_right_wheel"
+          boundingObject Cylinder {
+            height 0.02
+            radius 0.0275
+          }
+          physics Physics {
+            density -1
+            mass 0.075
+          }
+        }
+      }
+      
+      # Enhanced Front Left Mecanum Wheel
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0 1 0
+          anchor 0.075 0.085 0.025
+        }
+        device [
+          RotationalMotor {
+            name "front_left_motor"
+            maxVelocity 15.0
+            maxTorque 1.0
+          }
+          PositionSensor {
+            name "front_left_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation 0.075 0.085 0.025
+          rotation 1 0 0 1.5708
+          children [
+            Group {
+              children [
+                # Main wheel hub
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.15 0.15 0.15
+                    metalness 0.8
+                    roughness 0.3
+                  }
+                  geometry Cylinder {
+                    height 0.02
+                    radius 0.0275
+                    subdivision 32
+                  }
+                }
+                # Mecanum rollers (simplified representation)
+                Transform {
+                  rotation 0 0 1 -0.785398
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+                Transform {
+                  rotation 0 0 1 -2.356194
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+          name "front_left_wheel"
+          boundingObject Cylinder {
+            height 0.02
+            radius 0.0275
+          }
+          physics Physics {
+            density -1
+            mass 0.075
+          }
+        }
+      }
+      
+      # Enhanced Front Right Mecanum Wheel
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0 1 0
+          anchor 0.075 -0.085 0.025
+        }
+        device [
+          RotationalMotor {
+            name "front_right_motor"
+            maxVelocity 15.0
+            maxTorque 1.0
+          }
+          PositionSensor {
+            name "front_right_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation 0.075 -0.085 0.025
+          rotation 1 0 0 1.5708
+          children [
+            Group {
+              children [
+                # Main wheel hub
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.15 0.15 0.15
+                    metalness 0.8
+                    roughness 0.3
+                  }
+                  geometry Cylinder {
+                    height 0.02
+                    radius 0.0275
+                    subdivision 32
+                  }
+                }
+                # Mecanum rollers (simplified representation)
+                Transform {
+                  rotation 0 0 1 0.785398
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+                Transform {
+                  rotation 0 0 1 2.356194
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.3 0.3 0.3
+                        metalness 0.6
+                        roughness 0.4
+                      }
+                      geometry Box {
+                        size 0.03 0.0075 0.02
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+          name "front_right_wheel"
+          boundingObject Cylinder {
+            height 0.02
+            radius 0.0275
+          }
+          physics Physics {
+            density -1
+            mass 0.075
+          }
+        }
+      }
+      
+      # Sensors
+      Lidar {
+        translation -0.075 0 0.05
+        name "lidar"
+        horizontalResolution 360
+        fieldOfView 6.28
+        numberOfLayers 1
+        minRange 0.01
+        maxRange 5.0
+        rotation 0 1 0 3.14159
+      }
+      GPS {
+        name "gps"
+      }
+      InertialUnit {
+        name "inertial_unit"
+      }
+    ]
+    
+    # Updated bounding object for physics
+    boundingObject Transform {
+      translation 0 0 0.075
+      children [
+        Box {
+          size 0.15 0.1 0.05
+        }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass 1.5
+    }
+  }
+} 
