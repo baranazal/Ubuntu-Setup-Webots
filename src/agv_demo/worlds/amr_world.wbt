@@ -276,15 +276,6 @@ Transform {
   ]
 }
 
-# AMR 1 - Top row, second column
-AMR {
-  translation -1.0 2.0 0
-  rotation 0 0 1 0.785398
-  name "AMR1"
-  baseColor 0.2 0.2 0.6
-  controller "amr_controller"
-}
-
 # AMR 2 - Top row, third column
 AMR {
   translation 1.0 2.0 0
@@ -326,6 +317,15 @@ AMR {
   translation 3.0 -2.0 0
   rotation 0 0 1 -1.5708
   name "AMR6"
+  baseColor 0.6 0.2 0.6
+  controller "amr_controller"
+}
+
+# AMR 7 - Replacment for AMR1
+AMR {
+  translation -1.0 2.0 0
+  rotation 0 0 1 -1.5708
+  name "AMR7"
   baseColor 0.6 0.2 0.6
   controller "amr_controller"
 }
