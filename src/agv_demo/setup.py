@@ -28,9 +28,6 @@ setup(
         (os.path.join('share', package_name, 'protos'), glob('protos/*.proto')),
         # Include scripts
         (os.path.join('share', package_name, 'scripts'), glob('scripts/*.py')),
-        # Include controllers
-        (os.path.join('share', package_name, 'controllers', 'ned'), 
-         glob('controllers/ned/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -42,8 +39,6 @@ setup(
     entry_points={
         'console_scripts': [
             'amr_controller = agv_demo.amr_controller:main',
-            'belt_controller = agv_demo.belt_controller:main',
-            'ned_controller = agv_demo.ned_controller:main',
         ],
     },
 )

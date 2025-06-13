@@ -33,7 +33,6 @@ def generate_launch_description():
     
     # Check controller files
     amr_controller = os.path.join(package_dir, 'agv_demo', 'amr_controller.py')
-    ned_controller = os.path.join(package_dir, 'agv_demo', 'ned_controller.py')
     
     controllers_found = True
     
@@ -41,9 +40,6 @@ def generate_launch_description():
         print(f"Warning: AMR controller file not found: {amr_controller}")
         controllers_found = False
     
-    if not os.path.exists(ned_controller):
-        print(f"Warning: Ned controller file not found: {ned_controller}")
-        controllers_found = False
     
     if not controllers_found:
         print("Warning: Some controllers not found, but simulation will use internal controllers specified in world file")
@@ -83,47 +79,22 @@ def generate_launch_description():
         )
     )
     
-    # Set environment variables for the Ned Webots controller
-    set_webots_robot_name = SetEnvironmentVariable(
-        name='WEBOTS_ROBOT_NAME',
-        value='Ned'
-    )
     
     set_webots_controller_url = SetEnvironmentVariable(
         name='WEBOTS_CONTROLLER_URL',
-        value='tcp://localhost:1234'
+        value='tcp://localhost:1235'
     )
     
-    # Launch the Ned controller which will connect to Webots
-    ned_webots_controller = ExecuteProcess(
-        cmd=[
-            'python3',
-            os.path.join(package_dir, 'controllers', 'ned', 'ned_controller.py')
-        ],
-        name='ned_webots_controller',
-        output='screen'
-    )
     
-    # Launch the Ned ROS2 interface node
-    ned_ros2_controller = Node(
-        package='agv_demo',
-        executable='ned_controller',
-        name='ned_ros2_controller',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
-    )
     
     # Combine all the launch entities
     launch_entities = [
-        LogInfo(msg="Starting simulation with AMRs and Ned robot"),
+        LogInfo(msg="Starting simulation with AMRs"),
         world_arg,
-        set_webots_robot_name,
         set_webots_controller_url,
         webots,
         webots_started,
         shutdown_handler,
-        ned_webots_controller,  # Launch the Webots controller first
-        ned_ros2_controller     # Then launch the ROS2 interface
     ]
     
     return LaunchDescription(launch_entities)
