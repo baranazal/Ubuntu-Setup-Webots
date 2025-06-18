@@ -16,6 +16,8 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64, Bool, Float64MultiArray
 from sensor_msgs.msg import JointState
 from rclpy.qos import QoSProfile, ReliabilityPolicy
+import signal
+import functools
 
 robot_status = {}
 status_lock = threading.Lock()
@@ -49,221 +51,35 @@ pickup_operation = {
 }
 pickup_lock = threading.Lock()
 
-orchestration_status = {
-    "active": False,
-    "state": "idle",
-    "robot_id": None,
-    "step": None,
-    "error": None,
-    "start_time": None,
-    "last_updated": time.time()
-}
-orchestration_lock = threading.Lock()
-
-PICKUP_POSITIONS = {
-    "amr_position": {"x": 0.237, "y": 0.0, "z": 0.0}
-    
-    }
-
-PICKUP_SEQUENCE = [
-    {"action": "move", "movement": "home", "delay": 1.0},
-    {"action": "gripper", "position": 1.0, "delay": 0.5},    # Open gripper wide
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.96, 0.0, 0.0, 0.0], "delay": 1.5},
-    
-    {"action": "move", "joint_positions": [1.57, 0.08, 0.96, 0.0, 0.0, 0.0], "delay": 2.0},
-    
-    {"action": "gripper", "position": -1.4, "delay": 1.5},
-    
-    {"action": "wait", "delay": 1.0},
-    
-    {"action": "move", "joint_positions": [1.57, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 1.5},
-    
-    {"action": "move", "joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 5},
-
-    {"action": "gripper", "position": 0.8, "delay": 0.5},
-    
-    {"action": "wait", "delay": 1.0},
-    
-    {"action": "move", "movement": "home", "delay": 1.0}
-]
-
-position_tolerance = 0.01
+position_tolerance = 0.02
 collision_distance = 0
 
-OPTIMAL_PICKUP_POSITION = {
-    "x": 1.0,
-    "y": 0.0,
-    "z": 0.0
-}
-
 ned_movements = {
-    "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    "forward": [0.0, 0.3, -0.3, 0.0, 0.0, 0.0],
-    "up": [0.0, 0.7, 0.0, 0.0, 0.0, 0.0],
-    "down": [0.0, -0.3, 0.0, 0.0, 0.0, 0.0],
-    "left": [-0.785, 0.0, 0.0, 0.0, 0.0, 0.0],
-    "right": [0.785, 0.0, 0.0, 0.0, 0.0, 0.0],
-    "wave": [0.0, 0.3, 0.0, 0.0, 0.5, 0.0],
-    
-    "pre_pickup": [0.0, 0.4, -0.2, 0.0, 0.0, 0.0],
-    "approach_box": [0.0, 0.5, -0.4, 0.0, 0.2, 0.0],
-    "grasp_position": [0.0, 0.6, -0.6, 0.0, 0.4, 0.0],
-    "lift_box": [0.0, 0.5, -0.3, 0.0, 0.4, 0.0],
-    "rotate_to_conveyor": [1.57, 0.4, -0.3, 0.0, 0.4, 0.0],
-    "position_over_conveyor": [1.57, 0.5, -0.5, 0.0, 0.4, 0.0],
-    
-    "pick_ready": [0.0, 0.4, -0.7, 0.0, 0.3, 0.0],
-    "grab": [0.0, 0.5, -0.7, 0.0, 0.0, 0.0],
-    "side_pick": [1.57, 0.3, -0.5, 0.0, 0.3, 0.0],
-    "show": [0.0, 0.2, -0.4, 0.0, 0.7, 0.0],
-    "reach_high": [0.0, 0.7, 0.2, 0.0, 0.3, 0.0],
-    "reach_low": [0.0, 0.1, -1.0, 0.0, 0.3, 0.0],
-    "rotate_wrist": [0.0, 0.2, -0.2, 0.0, 0.0, 1.0],
-    "diagonal": [0.785, 0.4, -0.5, 0.5, 0.3, 0.785],
-    "fold": [0.0, 0.0, -1.3, 0.0, 0.0, 0.0],
-    "stretch": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-    "twist": [0.0, 0.2, -0.2, 1.57, 0.0, 0.0],
-    "shake": [1.0, 0.2, -0.3, 0.0, 0.5, 1.0],
-    "point": [0.0, 0.0, -0.5, 0.0, 1.0, 0.0],
-    
-    "prepare_for_pickup": [0.0, -0.3, 0.2, 0.0, 0.5, 0.0],
-    "approach_amr": [0.0, -0.5, 0.3, 0.0, 0.8, 0.0],
-    "pickup_position": [0.0, -0.6, 0.4, 0.0, 0.8, 0.0],
-    "lift_from_amr": [0.0, -0.3, 0.1, 0.0, 0.8, 0.0],
-    "rotate_to_belt": [1.57, -0.3, 0.1, 0.0, 0.8, 0.0],
-    "approach_belt": [1.57, -0.4, 0.2, 0.0, 0.8, 0.0],
-    "place_on_belt": [1.57, -0.5, 0.3, 0.0, 0.8, 0.0]
+    "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 }
 
-orchestration_thread = None
-should_stop_orchestration = False
+def normalize_angle(angle):
+    """Normalize angle to [-pi, pi] range"""
+    while angle > math.pi:
+        angle -= 2 * math.pi
+    while angle < -math.pi:
+        angle += 2 * math.pi
+    return angle
 
-def orchestration_worker(robot_id):
-    """Background worker for orchestrating the pickup workflow"""
-    global orchestration_status, navigator_node, ned_controller, belt_controller, should_stop_orchestration
-    
-    try:
-        with orchestration_lock:
-            orchestration_status["state"] = "starting"
-            orchestration_status["step"] = "positioning_amr"
-            orchestration_status["last_updated"] = time.time()
-        
-        amr_pos = PICKUP_POSITIONS["amr_position"]
-        print(f"Starting orchestration: Redirecting {robot_id} to position ({amr_pos['x']}, {amr_pos['y']}, {amr_pos['z']})")
-        
-        if not navigator_node.start_navigation_to_coordinates(robot_id, amr_pos['x'], amr_pos['y'], amr_pos['z']):
-            with orchestration_lock:
-                orchestration_status["state"] = "error"
-                orchestration_status["error"] = "Failed to start navigation"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        position_reached = False
-        timeout = time.time() + 30
-        
-        while time.time() < timeout and not position_reached and not should_stop_orchestration:
-            with status_lock:
-                if robot_id in robot_status:
-                    robot_x = robot_status[robot_id]["position"]["x"]
-                    robot_y = robot_status[robot_id]["position"]["y"]
-                    
-                    distance = math.sqrt((robot_x - amr_pos['x'])**2 + (robot_y - amr_pos['y'])**2)
-                    
-                    if distance < position_tolerance:
-                        position_reached = True
-                        with orchestration_lock:
-                            orchestration_status["state"] = "amr_positioned"
-                            orchestration_status["step"] = "initiating_pickup"
-                            orchestration_status["last_updated"] = time.time()
-            
-            if not position_reached:
-                time.sleep(0.5)
-        
-        if should_stop_orchestration:
-            with orchestration_lock:
-                orchestration_status["state"] = "cancelled"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        if not position_reached:
-            with orchestration_lock:
-                orchestration_status["state"] = "error"
-                orchestration_status["error"] = "Timeout waiting for AMR to reach position"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "executing_pickup"
-            orchestration_status["step"] = "starting_arm_sequence"
-            orchestration_status["last_updated"] = time.time()
-        
-        sequence_name = f"pickup_sequence_{robot_id}_{int(time.time())}"
-        
-        ned_controller.custom_sequences[sequence_name] = PICKUP_SEQUENCE
-        
-        print(f"Executing pickup sequence: {sequence_name}")
-        ned_controller.execute_sequence(sequence_name)
-        
-        with orchestration_lock:
-            orchestration_status["step"] = "waiting_for_sequence_completion"
-            orchestration_status["last_updated"] = time.time()
-            
-        sequence_timeout = time.time() + 30
-        while time.time() < sequence_timeout and ned_controller.sequence_running and not should_stop_orchestration:
-            time.sleep(0.5)
-            
-            with orchestration_lock:
-                orchestration_status["last_updated"] = time.time()
-        
-        if should_stop_orchestration:
-            with orchestration_lock:
-                orchestration_status["state"] = "cancelled"
-                orchestration_status["active"] = False
-                orchestration_status["last_updated"] = time.time()
-            return
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "starting_conveyor"
-            orchestration_status["step"] = "belt_movement"
-            orchestration_status["last_updated"] = time.time()
-        
-        belt_controller.set_belt_speed(0.25)
-        time.sleep(5.0)
-        belt_controller.set_belt_speed(0.0)
-        
-        if sequence_name in ned_controller.custom_sequences:
-            del ned_controller.custom_sequences[sequence_name]
-        
-        with orchestration_lock:
-            orchestration_status["state"] = "completed"
-            orchestration_status["active"] = False
-            orchestration_status["last_updated"] = time.time()
-        
-        print(f"Orchestration completed successfully for {robot_id}")
-        
-    except Exception as e:
-        print(f"Error in orchestration: {str(e)}")
-        with orchestration_lock:
-            orchestration_status["state"] = "error"
-            orchestration_status["error"] = str(e)
-            orchestration_status["active"] = False
-            orchestration_status["last_updated"] = time.time()
+def angle_difference(target_angle, current_angle):
+    """Calculate the shortest angular difference between two angles"""
+    diff = normalize_angle(target_angle - current_angle)
+    return diff
 
 class AMRNavigator(Node):
-    """ROS2 node that handles AMR navigation commands"""
+    """ROS2 node that handles AMR navigation commands with orientation support"""
     
     def __init__(self):
         super().__init__('amr_navigator')
         
         self.cmd_vel_publishers = {}
         
-        robot_names = ["AMR1", "AMR2", "AMR3", "AMR4", "AMR5", "AMR6"]
+        robot_names = ["AMR2", "AMR3", "AMR4", "AMR5", "AMR6", "AMR7"]
         
         for robot_name in robot_names:
             qos = QoSProfile(depth=10)
@@ -279,13 +95,18 @@ class AMRNavigator(Node):
                 nav_status[robot_name] = {
                     "active": False,
                     "target_coordinates": None,
+                    "target_orientation": None,
                     "status": "idle",
-                    "last_updated": time.time()
+                    "last_updated": time.time(),
+                    "settling_start_time": None
                 }
             
             self.get_logger().info(f"Navigation control ready for {robot_name}")
         
-        self.nav_timer = self.create_timer(0.1, self.navigation_loop)
+        self.nav_timer = self.create_timer(0.2, self.navigation_loop)
+        
+        self.loop_count = 0
+        self.last_performance_log = time.time()
     
     def send_velocity_command(self, robot_name, linear_x, linear_y, angular_z):
         """Send a velocity command to a specific robot"""
@@ -308,8 +129,8 @@ class AMRNavigator(Node):
         """Send a stop command to a specific robot"""
         return self.send_velocity_command(robot_name, 0.0, 0.0, 0.0)
     
-    def start_navigation_to_coordinates(self, robot_name, x, y, z):
-        """Start navigation for a robot to specific coordinates"""
+    def start_navigation_to_coordinates(self, robot_name, x, y, z, roll=0.0, pitch=0.0, yaw=0.0):
+        """Start navigation for a robot to specific coordinates with orientation"""
         with nav_lock:
             if robot_name not in nav_status:
                 self.get_logger().error(f"Robot {robot_name} not found for navigation")
@@ -318,12 +139,14 @@ class AMRNavigator(Node):
             nav_status[robot_name] = {
                 "active": True,
                 "target_coordinates": {"x": x, "y": y, "z": z},
+                "target_orientation": {"roll": roll, "pitch": pitch, "yaw": yaw},
                 "status": "starting",
                 "last_updated": time.time(),
-                "error": None
+                "error": None,
+                "settling_start_time": None
             }
             
-            self.get_logger().info(f"Starting navigation for {robot_name} to coordinates ({x}, {y}, {z})")
+            self.get_logger().info(f"Starting navigation for {robot_name} to coordinates ({x}, {y}, {z}) with orientation (roll: {roll}, pitch: {pitch}, yaw: {yaw})")
             return True
     
     def is_path_clear(self, robot_name, target_x, target_y):
@@ -372,112 +195,215 @@ class AMRNavigator(Node):
             return True
     
     def navigation_loop(self):
-        """Main navigation control loop"""
+        """Main navigation control loop with orientation support"""
+        self.loop_count += 1
+        
+        current_time = time.time()
+        if current_time - self.last_performance_log > 300:
+            self.get_logger().info(f"Navigation loop performance: {self.loop_count} iterations in 5 minutes")
+            self.loop_count = 0
+            self.last_performance_log = current_time
+        
+        nav_status_copy = {}
         with nav_lock:
-            for robot_name, status in nav_status.items():
-                if not status["active"]:
+            nav_status_copy = {k: dict(v) for k, v in nav_status.items()}
+        
+        for robot_name, status in nav_status_copy.items():
+            if not status["active"]:
+                continue
+            
+            if "target_coordinates" not in status or not status["target_coordinates"]:
+                self.get_logger().error(f"No valid target for {robot_name}")
+                with nav_lock:
+                    if robot_name in nav_status:
+                        nav_status[robot_name]["active"] = False
+                        nav_status[robot_name]["status"] = "error"
+                        nav_status[robot_name]["error"] = "No valid target"
+                self.stop_robot(robot_name)
+                continue
+            
+            target_x = status["target_coordinates"]["x"]
+            target_y = status["target_coordinates"]["y"]
+            target_z = status["target_coordinates"].get("z", 0.0)
+            
+            target_orientation = status.get("target_orientation", {"roll": 0.0, "pitch": 0.0, "yaw": 0.0})
+            target_yaw = target_orientation.get("yaw", 0.0)
+            
+            robot_pos = None
+            robot_theta = None
+            robot_moving = None
+            
+            with status_lock:
+                if robot_name not in robot_status:
+                    self.get_logger().error(f"Robot {robot_name} position unknown")
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            nav_status[robot_name]["active"] = False
+                            nav_status[robot_name]["status"] = "error"
+                            nav_status[robot_name]["error"] = "Robot position unknown"
                     continue
-                
-                if "target_coordinates" not in status or not status["target_coordinates"]:
-                    self.get_logger().error(f"No valid target for {robot_name}")
-                    status["active"] = False
-                    status["status"] = "error"
-                    status["error"] = "No valid target"
-                    self.stop_robot(robot_name)
-                    continue
-                
-                target_x = status["target_coordinates"]["x"]
-                target_y = status["target_coordinates"]["y"]
-                target_z = status["target_coordinates"].get("z", 0.0)
-                
-                with status_lock:
-                    if robot_name not in robot_status:
-                        self.get_logger().error(f"Robot {robot_name} position unknown")
-                        status["active"] = False
-                        status["status"] = "error"
-                        status["error"] = "Robot position unknown"
-                        continue
-                        
-                    robot_pos = robot_status[robot_name]["position"]
-                    robot_x = robot_pos["x"]
-                    robot_y = robot_pos["y"]
-                    robot_theta = robot_status[robot_name]["orientation"]
-                    robot_moving = robot_status[robot_name]["moving"]
-                
-                dx = target_x - robot_x
-                dy = target_y - robot_y
-                distance = math.sqrt(dx*dx + dy*dy)
+                    
+                robot_pos = robot_status[robot_name]["position"]
+                robot_theta = robot_status[robot_name]["orientation"]["yaw"]
+                robot_moving = robot_status[robot_name]["moving"]
+            
+            robot_x = robot_pos["x"]
+            robot_y = robot_pos["y"]
+            
+            dx = target_x - robot_x
+            dy = target_y - robot_y
+            distance = math.sqrt(dx*dx + dy*dy)
+            
+            if distance > position_tolerance:
+                with nav_lock:
+                    if robot_name in nav_status:
+                        nav_status[robot_name]["settling_start_time"] = None
                 
                 target_angle = math.atan2(dy, dx)
-                angle_diff = target_angle - robot_theta
-        
-                while angle_diff > math.pi:
-                    angle_diff -= 2 * math.pi
-                while angle_diff < -math.pi:
-                    angle_diff += 2 * math.pi
+                angle_diff = angle_difference(target_angle, robot_theta)
         
                 target_desc = f"coordinates ({target_x:.2f}, {target_y:.2f}, {target_z:.2f})"
-                status["status"] = f"navigating to {target_desc}"
-                status["last_updated"] = time.time()
                 
-                if distance < position_tolerance:
-                    self.get_logger().info(f"{robot_name} reached target {target_desc}")
-                    status["active"] = False
-                    status["status"] = "reached"
-                    self.stop_robot(robot_name)
-                    continue
+                with nav_lock:
+                    if robot_name in nav_status:
+                        nav_status[robot_name]["status"] = f"navigating to {target_desc}"
+                        nav_status[robot_name]["last_updated"] = time.time()
                 
                 if not self.is_path_clear(robot_name, target_x, target_y):
                     self.get_logger().warn(f"Path not clear for {robot_name}")
-                    status["status"] = "waiting - path blocked"
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            nav_status[robot_name]["status"] = "waiting - path blocked"
                     self.stop_robot(robot_name)
                     continue
                 
-                linear_speed = 0.2
+                max_linear_speed = 0.6
+                min_linear_speed = 0.08
                 angular_speed = 0.5
-                angle_tolerance = 0.1
+                angle_tolerance = 0.01
+                
+                slowdown_distance = 1.5
+                
+                if distance > slowdown_distance:
+                    current_linear_speed = max_linear_speed
+                else:
+                    speed_ratio = distance / slowdown_distance
+                    speed_ratio = speed_ratio * speed_ratio
+                    current_linear_speed = min_linear_speed + (max_linear_speed - min_linear_speed) * speed_ratio
+                    current_linear_speed = max(min_linear_speed, current_linear_speed)
+                
                 fine_positioning_distance = 0.5
                 
-                if distance < fine_positioning_distance and distance > position_tolerance:
-                    base_speed = 0.05
-                    precision_speed = 0.1
-                    fine_speed = base_speed + precision_speed * (distance / fine_positioning_distance)
+                if distance < fine_positioning_distance:
+                    precision_speed = min_linear_speed + 0.05 * (distance / fine_positioning_distance)
                     
                     if abs(angle_diff) > angle_tolerance / 2:
-                        angular_vel = (angular_speed * 0.5) * angle_diff / math.pi
+                        angular_vel = (angular_speed * 0.4) * angle_diff / math.pi
                         self.send_velocity_command(robot_name, 0.0, 0.0, angular_vel)
-                        status["status"] = f"fine positioning - aligning precisely"
+                        with nav_lock:
+                            if robot_name in nav_status:
+                                nav_status[robot_name]["status"] = f"fine positioning - aligning (dist: {distance:.2f}m)"
                     else:
                         small_correction = angle_diff * 0.3
-                        self.send_velocity_command(robot_name, fine_speed, 0.0, small_correction)
-                        status["status"] = f"fine positioning - moving precisely"
-                        self.get_logger().debug(f"{robot_name} fine positioning: current=({robot_x:.3f}, {robot_y:.3f}), target=({target_x:.3f}, {target_y:.3f})")
+                        self.send_velocity_command(robot_name, precision_speed, 0.0, small_correction)
+                        with nav_lock:
+                            if robot_name in nav_status:
+                                nav_status[robot_name]["status"] = f"fine positioning - approaching (dist: {distance:.2f}m)"
                 
                 elif abs(angle_diff) > angle_tolerance:
-                    angular_vel = angular_speed * (angle_diff / abs(angle_diff))
+                    angular_vel = angular_speed * (angle_diff / abs(angle_diff)) * min(1.0, abs(angle_diff) / 0.5)
                     self.send_velocity_command(robot_name, 0.0, 0.0, angular_vel)
-                    status["status"] = f"turning"
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            nav_status[robot_name]["status"] = f"turning toward target (speed: fast)"
                 else:
-                    min_regular_speed = 0.1
-                    regular_adjusted_speed = max(min_regular_speed, min(linear_speed, linear_speed * distance))
-                    angular_correction = angle_diff * 0.5
-                    self.send_velocity_command(robot_name, regular_adjusted_speed, 0.0, angular_correction)
-                    status["status"] = f"moving"
+                    angular_correction = angle_diff * 0.3
+                    self.send_velocity_command(robot_name, current_linear_speed, 0.0, angular_correction)
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            speed_desc = "fast" if distance > slowdown_distance else "slowing"
+                            nav_status[robot_name]["status"] = f"moving to target ({speed_desc}, dist: {distance:.2f}m, speed: {current_linear_speed:.2f})"
+            
+            else:
+                current_time = time.time()
+                settling_time = 2.0
+                
+                settling_start_time = None
+                with nav_lock:
+                    if robot_name in nav_status:
+                        settling_start_time = nav_status[robot_name]["settling_start_time"]
+                        
+                        if settling_start_time is None:
+                            nav_status[robot_name]["settling_start_time"] = current_time
+                            settling_start_time = current_time
+                            self.get_logger().info(f"{robot_name} reached position, starting 2-second settling period before yaw adjustment")
+                
+                if settling_start_time and (current_time - settling_start_time) < settling_time:
+                    self.stop_robot(robot_name)
+                    remaining_time = settling_time - (current_time - settling_start_time)
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            nav_status[robot_name]["status"] = f"settling at position (waiting {remaining_time:.1f}s before yaw adjustment)"
+                            nav_status[robot_name]["last_updated"] = time.time()
+                    continue
+                
+                yaw_diff = angle_difference(target_yaw, robot_theta)
+                
+                orientation_tolerance = 0.01
+                
+                if abs(yaw_diff) > orientation_tolerance:
+                    base_angular_speed = 0.2
+                    
+                    if abs(yaw_diff) > 0.5:
+                        angular_speed = base_angular_speed
+                    else:
+                        angular_speed = base_angular_speed * (abs(yaw_diff) / 0.5)
+                        angular_speed = max(0.05, angular_speed)
+                    
+                    angular_vel = angular_speed * (yaw_diff / abs(yaw_diff))
+                    self.send_velocity_command(robot_name, 0.0, 0.0, angular_vel)
+                    
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            current_yaw_deg = math.degrees(robot_theta)
+                            target_yaw_deg = math.degrees(target_yaw)
+                            yaw_diff_deg = math.degrees(yaw_diff)
+                            nav_status[robot_name]["status"] = f"adjusting orientation (current: {current_yaw_deg:.1f}°, target: {target_yaw_deg:.1f}°, diff: {yaw_diff_deg:.1f}°)"
+                            nav_status[robot_name]["last_updated"] = time.time()
+                else:
+                    self.get_logger().info(f"{robot_name} reached target position and orientation (tolerance: {math.degrees(orientation_tolerance):.1f}°)")
+                    self.stop_robot(robot_name)
+                    
+                    time.sleep(0.1)
+                    
+                    with nav_lock:
+                        if robot_name in nav_status:
+                            nav_status[robot_name]["active"] = False
+                            nav_status[robot_name]["status"] = "reached"
+                            final_yaw_deg = math.degrees(robot_theta)
+                            target_yaw_deg = math.degrees(target_yaw)
+                            nav_status[robot_name]["final_position"] = {
+                                "x": robot_x,
+                                "y": robot_y,
+                                "yaw_degrees": final_yaw_deg,
+                                "target_yaw_degrees": target_yaw_deg,
+                                "yaw_error_degrees": math.degrees(abs(yaw_diff))
+                            }
 
 class AMRStatusMonitor(Node):
-    """ROS2 node that subscribes to AMR odometry topics and stores their status"""
+    """ROS2 node that subscribes to AMR odometry topics and stores their status with full orientation"""
     
     def __init__(self):
         super().__init__('amr_status_monitor')
         
         self.odom_subscribers = {}
-        robot_names = ["AMR1", "AMR2", "AMR3", "AMR4", "AMR5", "AMR6"]
+        robot_names = ["AMR2", "AMR3", "AMR4", "AMR5", "AMR6", "AMR7"]
         
         for robot_name in robot_names:
             with status_lock:
                 robot_status[robot_name] = {
                     "position": {"x": 0.0, "y": 0.0, "z": 0.0},
-                    "orientation": 0.0,
+                    "orientation": {"roll": 0.0, "pitch": 0.0, "yaw": 0.0},
                     "moving": False,
                     "last_updated": time.time()
                 }
@@ -492,14 +418,29 @@ class AMRStatusMonitor(Node):
             self.get_logger().info(f"Monitoring status for {robot_name}")
     
     def odom_callback(self, msg, robot_name):
-        """Process odometry data for a specific robot"""
+        """Process odometry data for a specific robot with full orientation"""
         pos_x = msg.pose.pose.position.x
         pos_y = msg.pose.pose.position.y
         pos_z = msg.pose.pose.position.z
         
-        orientation = 2.0 * math.acos(msg.pose.pose.orientation.w)
-        if msg.pose.pose.orientation.z < 0:
-            orientation = -orientation
+        qx = msg.pose.pose.orientation.x
+        qy = msg.pose.pose.orientation.y
+        qz = msg.pose.pose.orientation.z
+        qw = msg.pose.pose.orientation.w
+        
+        sinr_cosp = 2 * (qw * qx + qy * qz)
+        cosr_cosp = 1 - 2 * (qx * qx + qy * qy)
+        roll = math.atan2(sinr_cosp, cosr_cosp)
+        
+        sinp = 2 * (qw * qy - qz * qx)
+        if abs(sinp) >= 1:
+            pitch = math.copysign(math.pi / 2, sinp)
+        else:
+            pitch = math.asin(sinp)
+        
+        siny_cosp = 2 * (qw * qz + qx * qy)
+        cosy_cosp = 1 - 2 * (qy * qy + qz * qz)
+        yaw = math.atan2(siny_cosp, cosy_cosp)
             
         linear_speed = math.sqrt(
             msg.twist.twist.linear.x**2 + 
@@ -511,7 +452,7 @@ class AMRStatusMonitor(Node):
         with status_lock:
             robot_status[robot_name] = {
                 "position": {"x": pos_x, "y": pos_y, "z": pos_z},
-                "orientation": orientation,
+                "orientation": {"roll": roll, "pitch": pitch, "yaw": yaw},
                 "moving": is_moving,
                 "last_updated": time.time(),
                 "velocities": {
@@ -626,6 +567,10 @@ class NedController(Node):
         self.movement_queue = []
         self.custom_sequences = {}
         
+        self.active_timers = set()
+        self.cleanup_interval = 60
+        self.last_cleanup = time.time()
+        
         self.get_logger().info("Ned arm API controller initialized")
     
     def joint_states_callback(self, msg):
@@ -715,8 +660,27 @@ class NedController(Node):
         self.movement_queue = sequence.copy()
         self._process_next_movement()
         
+    def _cleanup_resources(self):
+        """Clean up stale timers and resources"""
+        current_time = time.time()
+        if current_time - self.last_cleanup > self.cleanup_interval:
+            stale_timers = []
+            for timer in self.active_timers:
+                if hasattr(timer, 'finished') and timer.finished:
+                    stale_timers.append(timer)
+            
+            for timer in stale_timers:
+                self.active_timers.discard(timer)
+            
+            self.last_cleanup = current_time
+            
+            if len(self.active_timers) > 10:
+                self.get_logger().warning(f"High number of active timers: {len(self.active_timers)}")
+    
     def _process_next_movement(self):
         """Process the next movement in the queue"""
+        self._cleanup_resources()
+        
         if not self.movement_queue:
             self.sequence_running = False
             self.get_logger().info("Movement sequence completed")
@@ -730,6 +694,8 @@ class NedController(Node):
                 success = self.execute_predefined_movement(movement["movement"])
             elif "joint_positions" in movement:
                 success = self.send_joint_command(movement["joint_positions"])
+            else:
+                self.get_logger().error(f"Move action requires 'movement' or 'joint_positions': {movement}")
         elif movement["action"] == "gripper":
             success = self.send_gripper_command(movement["position"])
         elif movement["action"] == "wait":
@@ -738,390 +704,102 @@ class NedController(Node):
         delay = movement.get("delay", 1.0)
         
         if success:
+            if self.sequence_timer:
+                self.sequence_timer.cancel()
+                self.active_timers.discard(self.sequence_timer)
+            
             self.sequence_timer = threading.Timer(delay, self._process_next_movement)
             self.sequence_timer.daemon = True
+            self.active_timers.add(self.sequence_timer)
             self.sequence_timer.start()
         else:
             self.get_logger().error(f"Failed to execute movement: {movement}")
             self.sequence_running = False
-
-class PickupPlaceOperationHandler:
-    """Handler for coordinating AMR, Ned arm, and conveyor belt for pickup and place operations"""
     
-    def __init__(self, navigator_node, ned_controller, belt_controller):
-        self.navigator_node = navigator_node
-        self.ned_controller = ned_controller
-        self.belt_controller = belt_controller
-        self.operation_thread = None
-        self.is_running = False
-    
-    def start_operation(self, amr_id):
-        """Start a pickup and place operation with the specified AMR"""
-        with pickup_lock:
-            if pickup_operation["active"]:
-                return False, f"Another operation is active with AMR {pickup_operation['amr_id']}"
-            
-            with status_lock:
-                if amr_id not in robot_status:
-                    return False, f"Robot {amr_id} not found"
-            
-            pickup_operation["active"] = True
-            pickup_operation["amr_id"] = amr_id
-            pickup_operation["state"] = "starting"
-            pickup_operation["start_time"] = time.time()
-            pickup_operation["error"] = None
-            pickup_operation["last_updated"] = time.time()
+    def stop_sequence(self):
+        """Stop current sequence and clean up resources"""
+        self.sequence_running = False
+        self.movement_queue.clear()
         
-        if self.operation_thread and self.operation_thread.is_alive():
-            self.is_running = False
-            self.operation_thread.join(timeout=2.0)
+        if self.sequence_timer:
+            self.sequence_timer.cancel()
+            self.active_timers.discard(self.sequence_timer)
+            self.sequence_timer = None
         
-        self.is_running = True
-        self.operation_thread = threading.Thread(target=self._execute_operation, args=(amr_id,), daemon=True)
-        self.operation_thread.start()
-        
-        return True, f"Pickup and place operation started with AMR {amr_id}"
-    
-    def _execute_operation(self, amr_id):
-        """Execute the pickup and place operation in a separate thread"""
-        try:
-            self._update_state("moving_amr_to_pickup", amr_id)
-            
-            success = self.navigator_node.start_navigation_to_coordinates(
-                amr_id, 
-                OPTIMAL_PICKUP_POSITION["x"], 
-                OPTIMAL_PICKUP_POSITION["y"], 
-                OPTIMAL_PICKUP_POSITION["z"]
-            )
-            
-            if not success:
-                self._update_state("error", amr_id, "Failed to start AMR navigation")
-                return
-            
-            reached_position = False
-            timeout = time.time() + 60
-            
-            while time.time() < timeout and self.is_running:
-                with nav_lock:
-                    if amr_id in nav_status:
-                        if not nav_status[amr_id]["active"] and nav_status[amr_id]["status"] == "reached":
-                            reached_position = True
-                            break
-                
-                time.sleep(0.5)
-            
-            if not reached_position:
-                self._update_state("error", amr_id, "AMR did not reach pickup position in time")
-                return
-            
-            self._update_state("positioning_arm", amr_id)
-            time.sleep(1.0)
-            
-            self.ned_controller.send_gripper_command(1.0)
-            time.sleep(1.0)
-            
-            success = self.ned_controller.send_joint_command(ned_movements["prepare_for_pickup"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to position Ned arm")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("approaching_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["approach_amr"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to approach box")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("grabbing_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["pickup_position"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to reach pickup position")
-                return
-            
-            time.sleep(2.0)
-            
-            self.ned_controller.send_gripper_command(0.05)
-            time.sleep(1.5)
-            
-            self._update_state("lifting_box", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["lift_from_amr"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to lift box")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("starting_belt", amr_id)
-            self.belt_controller.set_belt_speed(0.25)
-            self.belt_controller.toggle_belt(True)
-            time.sleep(1.0)
-            
-            self._update_state("rotating_to_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["rotate_to_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to rotate to belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("approaching_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["approach_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to approach belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("positioning_over_belt", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["place_on_belt"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to position over belt")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("releasing_box", amr_id)
-            self.ned_controller.send_gripper_command(1.0)
-            time.sleep(1.5)
-            
-            self._update_state("returning_home", amr_id)
-            success = self.ned_controller.send_joint_command(ned_movements["home"])
-            if not success:
-                self._update_state("error", amr_id, "Failed to return home")
-                return
-            
-            time.sleep(2.0)
-            
-            self._update_state("completed", amr_id)
-            
-        except Exception as e:
-            self._update_state("error", amr_id, f"Operation error: {str(e)}")
-        
-        finally:
-            self.is_running = False
-    
-    def _update_state(self, state, amr_id, error=None):
-        """Update the operation state with thread safety"""
-        with pickup_lock:
-            pickup_operation["state"] = state
-            pickup_operation["amr_id"] = amr_id
-            pickup_operation["error"] = error
-            pickup_operation["last_updated"] = time.time()
-            
-            if state == "error" or state == "completed":
-                pickup_operation["active"] = False
-    
-    def get_operation_status(self):
-        """Get the current operation status"""
-        with pickup_lock:
-            return {
-                "active": pickup_operation["active"],
-                "amr_id": pickup_operation["amr_id"],
-                "state": pickup_operation["state"],
-                "start_time": pickup_operation["start_time"],
-                "error": pickup_operation["error"],
-                "last_updated": pickup_operation["last_updated"],
-                "elapsed_time": time.time() - pickup_operation["start_time"] if pickup_operation["start_time"] else None
-            }
-    
-    def stop_operation(self):
-        """Stop the current operation"""
-        self.is_running = False
-        
-        with pickup_lock:
-            pickup_operation["active"] = False
-            pickup_operation["state"] = "stopped"
-            pickup_operation["error"] = "Operation manually stopped"
-            pickup_operation["last_updated"] = time.time()
-        
-        if pickup_operation["amr_id"]:
-            self.navigator_node.stop_robot(pickup_operation["amr_id"])
-        
-        self.ned_controller.send_joint_command(ned_movements["home"])
-        
-        self.belt_controller.toggle_belt(False)
-        
-        return True
+        for timer in list(self.active_timers):
+            timer.cancel()
+        self.active_timers.clear()
 
 operation_handler = None
 
 app = Flask(__name__)
 
-############################################################ START OF TESTING API ############################################################  
-# This one performs the entire orchestration from start to finish
-@app.route('/api/orchestrate-pickup', methods=['POST'])
-def orchestrate_pickup():
-    """
-    Orchestrates the entire pickup workflow:
-    1. Position the AMR at the optimal location for the robotic arm
-    2. Execute the robotic arm pickup sequence
-    3. Start the conveyor belt to transport the box
-    
-    This is a composite API that coordinates multiple systems.
-    """
-    global orchestration_thread, should_stop_orchestration, navigator_node, orchestration_status
-    
-    with orchestration_lock:
-        if orchestration_status["active"]:
-            current_state = orchestration_status["state"]
-            return jsonify({
-                "success": False,
-                "error": f"Orchestration already in progress (state: {current_state})",
-                "orchestration_status": orchestration_status
-            }), 409
-    
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    if 'robot_id' not in data:
-        return jsonify({"success": False, "error": "Missing required field: robot_id"}), 400
-    
-    robot_id = data['robot_id']
-    
-    with status_lock:
-        if robot_id not in robot_status:
-            return jsonify({
-                "success": False,
-                "error": f"Robot {robot_id} not found",
-                "available_robots": list(robot_status.keys())
-            }), 404
-    
-    with orchestration_lock:
-        orchestration_status["active"] = True
-        orchestration_status["state"] = "initializing"
-        orchestration_status["robot_id"] = robot_id
-        orchestration_status["step"] = "startup"
-        orchestration_status["error"] = None
-        orchestration_status["start_time"] = time.time()
-        orchestration_status["last_updated"] = time.time()
-    
-    should_stop_orchestration = False
-    
-    orchestration_thread = threading.Thread(
-        target=orchestration_worker,
-        args=(robot_id,),
-        daemon=True
-    )
-    orchestration_thread.start()
-    
-    return jsonify({
-        "success": True,
-        "message": f"Orchestration started for {robot_id}",
-        "robot_id": robot_id,
-        "status_endpoint": "/api/orchestrate-pickup/status",
-        "cancel_endpoint": "/api/orchestrate-pickup/cancel"
-    })
-# this one is used to get the status of the orchestration
-@app.route('/api/orchestrate-pickup/status', methods=['GET'])
-def get_orchestration_status():
-    """Get the current status of the pickup orchestration"""
-    with orchestration_lock:
-        status_copy = dict(orchestration_status)
-        status_copy["timestamp"] = time.time()
-        
-        if status_copy["start_time"]:
-            status_copy["elapsed_seconds"] = time.time() - status_copy["start_time"]
-        
-        return jsonify(status_copy)
-
-@app.route('/api/orchestrate-pickup/cancel', methods=['POST'])
-def cancel_orchestration():
-    """Cancel the current pickup orchestration"""
-    global should_stop_orchestration
-    
-    with orchestration_lock:
-        if not orchestration_status["active"]:
-            return jsonify({
-                "success": True,
-                "message": "No orchestration is currently active"
-            })
-        
-        robot_id = orchestration_status["robot_id"]
-    
-    should_stop_orchestration = True
-    
-    if navigator_node and robot_id:
-        navigator_node.stop_robot(robot_id)
-    
-    if ned_controller:
-        if ned_controller.sequence_running and ned_controller.sequence_timer:
-            ned_controller.sequence_timer.cancel()
-        ned_controller.sequence_running = False
-        ned_controller.movement_queue = []
-        ned_controller.send_joint_command(ned_movements["home"])
-    
-    if belt_controller:
-        belt_controller.set_belt_speed(0.0)
-    
-    return jsonify({
-        "success": True,
-        "message": f"Orchestration cancellation requested for {robot_id}",
-        "note": "The orchestration will be cancelled soon"
-    })
-####################################################################### END OF TESTING API #######################################################################
-
 ################################################################### START OF INDIVIDUAL COMPONENT APIs ####################################################################
 # This one is used to move the AMR to a specified coordinates
 @app.route('/api/movement/AMR', methods=['POST'])
 def move_amr():
-    """
-    API endpoint to move the AMR to specified coordinates
-    
-    Expected JSON payload:
-    {
-        "robot_id": "AMR",  // Robot ID to move
-        "x": 1.0,           // Target X coordinate
-        "y": 0.0,           // Target Y coordinate
-        "z": 0.0            // Target Z coordinate
-    }
-    """
+    """API endpoint to move the AMR to specified coordinates with orientation"""
     global navigator_node
     
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "Missing request body"}), 400
-    
-    # Validate required fields
-    required_fields = ['robot_id', 'x', 'y', 'z']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
-    
-    robot_id = data['robot_id']
-    target_x = float(data['x'])
-    target_y = float(data['y'])
-    target_z = float(data['z'])
-    
-    with status_lock:
-        if robot_id not in robot_status:
-            available_robots = list(robot_status.keys())
-            if len(available_robots) == 0:
-                error_msg = "No robots are currently available in the simulation"
-            else:
-                error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "error": "Missing request body"}), 400
+        
+        required_fields = ['robot_id', 'x', 'y', 'z', 'roll', 'pitch', 'yaw']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
+        
+        robot_id = data['robot_id']
+        target_x = float(data['x'])
+        target_y = float(data['y'])
+        target_z = float(data['z'])
+        
+        target_roll = float(data['roll'])
+        target_pitch = float(data['pitch'])
+        target_yaw = float(data['yaw'])
+        
+        with status_lock:
+            if robot_id not in robot_status:
+                available_robots = list(robot_status.keys())
+                if len(available_robots) == 0:
+                    error_msg = "No robots are currently available in the simulation"
+                else:
+                    error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+                    
+                return jsonify({
+                    "success": False,
+                    "error": error_msg,
+                    "available_robots": available_robots
+                }), 404
                 
+        if navigator_node and navigator_node.start_navigation_to_coordinates(
+            robot_id, target_x, target_y, target_z, target_roll, target_pitch, target_yaw
+        ):
+            return jsonify({
+                "success": True,
+                "message": f"Robot {robot_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z}) with orientation (roll: {target_roll}, pitch: {target_pitch}, yaw: {target_yaw})",
+                "robot_id": robot_id,
+                "target_position": {"x": target_x, "y": target_y, "z": target_z},
+                "target_orientation": {"roll": target_roll, "pitch": target_pitch, "yaw": target_yaw}
+            })
+        else:
             return jsonify({
                 "success": False,
-                "error": error_msg,
-                "available_robots": available_robots
-            }), 404
+                "error": "Failed to start navigation",
+                "status": "failed"
+            }), 500
             
-    if navigator_node and navigator_node.start_navigation_to_coordinates(robot_id, target_x, target_y, target_z):
-        return jsonify({
-            "success": True,
-            "message": f"Robot {robot_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z})",
-            "robot_id": robot_id,
-            "target_position": {"x": target_x, "y": target_y, "z": target_z}
-        })
-    else:
+    except ValueError as e:
         return jsonify({
             "success": False,
-            "error": "Failed to start navigation",
-            "status": "failed"
+            "error": f"Invalid coordinate or orientation values: {str(e)}"
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Internal server error: {str(e)}"
         }), 500
 
 @app.route('/api/movement/robotic_arm', methods=['POST'])
@@ -1132,10 +810,10 @@ def move_robotic_arm():
     Expected JSON payload:
     {
         "sequence": [
-            {"action": "move", "movement": "home", "delay": 1.0},
+            {"action": "move", "joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 1.0},
             {"action": "gripper", "position": 1.0, "delay": 0.5},
             {"action": "move", "joint_positions": [0.0, 0.3, 0.0, 0.0, 0.0, 0.0], "delay": 2.0},
-            // More steps as needed
+            {"action": "wait", "delay": 1.0}
         ]
     }
     """
@@ -1154,7 +832,6 @@ def move_robotic_arm():
     try:
         sequence = data['sequence']
         
-        # Validate the sequence
         for step in sequence:
             if 'action' not in step:
                 return jsonify({
@@ -1189,7 +866,6 @@ def move_robotic_arm():
                         "error": f"Gripper action requires 'position': {step}"
                     }), 400
         
-        # Execute the sequence
         ned_controller.execute_movement_sequence(sequence)
         
         return jsonify({
@@ -1223,7 +899,6 @@ def control_conveyor_belt():
     if not data:
         return jsonify({"success": False, "error": "Missing request body"}), 400
     
-    # Validate required fields
     required_fields = ['speed', 'direction', 'running']
     for field in required_fields:
         if field not in data:
@@ -1238,7 +913,6 @@ def control_conveyor_belt():
             return jsonify({"success": False, "error": "Direction must be 'forward' or 'reverse'"}), 400
         
         if not running:
-            # Stop the belt
             success, _ = belt_controller.set_belt_speed(0.0)
             if success:
                 return jsonify({
@@ -1248,7 +922,6 @@ def control_conveyor_belt():
             else:
                 return jsonify({"success": False, "error": "Failed to stop belt"}), 500
         else:
-            # Set the belt speed and direction
             abs_speed = abs(speed_value)
             target_speed = abs_speed if direction == 'forward' else -abs_speed
             
@@ -1269,47 +942,61 @@ def control_conveyor_belt():
 
 @app.route('/api/status/<robot_id>', methods=['GET'])
 def get_status(robot_id):
-    """API endpoint to get the status of a specific AMR robot"""
-    with status_lock:
-        if robot_id in robot_status:
-            status = robot_status[robot_id]
-            
-            nav_info = {}
-            with nav_lock:
-                if robot_id in nav_status:
-                    robot_nav = nav_status[robot_id]
-                    nav_info = {
-                        "active": robot_nav["active"],
-                        "status": robot_nav["status"]
-                    }
-                    
-                    if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
-                        nav_info["target_coordinates"] = robot_nav["target_coordinates"]
-            
-            velocities = None
-            if "velocities" in status:
-                velocities = status["velocities"]
-            
-            return jsonify({
-                "robot_id": robot_id,
-                "position": status["position"],
-                "orientation": status["orientation"],
-                "moving": status["moving"],
-                "last_updated": status["last_updated"],
-                "navigation": nav_info,
-                "velocities": velocities
-            })
-        else:
-            available_robots = list(robot_status.keys())
-            if len(available_robots) == 0:
-                error_msg = "No robots are currently available in the simulation"
+    """API endpoint to get the status of a specific AMR robot with orientation details"""
+    try:
+        with status_lock:
+            if robot_id in robot_status:
+                status = robot_status[robot_id]
+                
+                nav_info = {}
+                with nav_lock:
+                    if robot_id in nav_status:
+                        robot_nav = nav_status[robot_id]
+                        nav_info = {
+                            "active": robot_nav["active"],
+                            "status": robot_nav["status"]
+                        }
+                        
+                        if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
+                            nav_info["target_coordinates"] = robot_nav["target_coordinates"]
+                        
+                        if "target_orientation" in robot_nav and robot_nav["target_orientation"]:
+                            nav_info["target_orientation"] = robot_nav["target_orientation"]
+                        
+                        if "final_position" in robot_nav:
+                            nav_info["final_position"] = robot_nav["final_position"]
+                
+                velocities = None
+                if "velocities" in status:
+                    velocities = status["velocities"]
+                
+                return jsonify({
+                    "robot_id": robot_id,
+                    "position": status["position"],
+                    "orientation": status["orientation"],
+                    "moving": status["moving"],
+                    "last_updated": status["last_updated"],
+                    "navigation": nav_info,
+                    "velocities": velocities,
+                    "timestamp": time.time()
+                })
             else:
-                error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
-            
-            return jsonify({
-                "error": error_msg,
-                "available_robots": available_robots
-            }), 404
+                available_robots = list(robot_status.keys())
+                if len(available_robots) == 0:
+                    error_msg = "No robots are currently available in the simulation"
+                else:
+                    error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+                
+                return jsonify({
+                    "error": error_msg,
+                    "available_robots": available_robots
+                }), 404
+                
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Internal server error: {str(e)}"
+        }), 500
 
 @app.route('/api/belt/status', methods=['GET'])
 def get_belt_status():
@@ -1352,8 +1039,22 @@ def get_ned_status():
         })
 
 def run_flask_server(host='0.0.0.0', port=5000):
-    """Run the Flask server"""
-    app.run(host=host, port=port, debug=False)
+    """Run the Flask server with optimized settings"""
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+    app.config['JSON_SORT_KEYS'] = False
+    
+    try:
+        app.run(
+            host=host, 
+            port=port, 
+            debug=False, 
+            threaded=True,
+            processes=1,
+            use_reloader=False
+        )
+    except Exception as e:
+        print(f"Flask server error: {e}")
+        raise
 
 def main(host='0.0.0.0', port=5000):
     """Main function to start ROS nodes and Flask server"""
@@ -1369,7 +1070,7 @@ def main(host='0.0.0.0', port=5000):
     belt_controller = BeltController()
     ned_controller = NedController()
     
-    executor = rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(monitor_node)
     executor.add_node(navigator_node)
     executor.add_node(belt_controller)
@@ -1378,10 +1079,40 @@ def main(host='0.0.0.0', port=5000):
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
     
-    run_flask_server(host, port)
+    def monitor_resources():
+        """Monitor system resources and log warnings"""
+        import threading
+        import gc
+        
+        while True:
+            time.sleep(300)
+            
+            thread_count = threading.active_count()
+            if thread_count > 20:
+                print(f"WARNING: High thread count: {thread_count}")
+            
+            gc.collect()
+            
+            if ned_controller and hasattr(ned_controller, 'active_timers'):
+                timer_count = len(ned_controller.active_timers)
+                if timer_count > 5:
+                    print(f"WARNING: High timer count in NED controller: {timer_count}")
     
-    executor.shutdown()
-    rclpy.shutdown()
+    monitor_thread = threading.Thread(target=monitor_resources, daemon=True)
+    monitor_thread.start()
+    
+    try:
+        run_flask_server(host, port)
+    except KeyboardInterrupt:
+        print("Shutting down...")
+    except Exception as e:
+        print(f"Server error: {e}")
+    finally:
+        if ned_controller and hasattr(ned_controller, 'stop_sequence'):
+            ned_controller.stop_sequence()
+        
+        executor.shutdown()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     import argparse

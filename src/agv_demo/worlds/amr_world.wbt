@@ -4,10 +4,13 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/CardboardBox.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/conveyors/protos/ConveyorBelt.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/niryo/ned/protos/Ned.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/PlasticCrate.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/pallet/protos/WoodenPallet.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/forklift/protos/Forklift.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/unimation/puma/protos/Puma560.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/neuronics/ipr/protos/IprHd6m90.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/niryo/ned/protos/Ned.proto"
 EXTERNPROTO "../worlds/AMR.proto"
 
 WorldInfo {
@@ -30,6 +33,815 @@ RectangleArena {
   floorSize 15 15
   floorTileSize 0.5 0.5
   wallHeight 0.3
+}
+
+# Border Walls - Industrial warehouse walls
+Transform {
+  translation 0 7.2 1
+  children [
+    DEF NORTH_WALL Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            metalness 0.1
+            roughness 0.7
+          }
+          geometry Box {
+            size 14.4 0.4 2
+          }
+        }
+      ]
+      name "north_wall"
+      boundingObject Box {
+        size 14.4 0.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 0 -7.2 1
+  children [
+    DEF SOUTH_WALL Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            metalness 0.1
+            roughness 0.7
+          }
+          geometry Box {
+            size 14.4 0.4 2
+          }
+        }
+      ]
+      name "south_wall"
+      boundingObject Box {
+        size 14.4 0.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 7.2 0 1
+  children [
+    DEF EAST_WALL Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            metalness 0.1
+            roughness 0.7
+          }
+          geometry Box {
+            size 0.4 14.4 2
+          }
+        }
+      ]
+      name "east_wall"
+      boundingObject Box {
+        size 0.4 14.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation -7.2 0 1
+  children [
+    DEF WEST_WALL Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.8 0.8
+            metalness 0.1
+            roughness 0.7
+          }
+          geometry Box {
+            size 0.4 14.4 2
+          }
+        }
+      ]
+      name "west_wall"
+      boundingObject Box {
+        size 0.4 14.4 2
+      }
+    }
+  ]
+}
+
+# Storage Shelves - Away from AGV area
+Transform {
+  translation -6 -5 0
+  children [
+    DEF SHELF1 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.7 0.5 0.3
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 3 0.4 2
+          }
+        }
+      ]
+      name "storage_shelf_1"
+      boundingObject Box {
+        size 3 0.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 6 -5 0
+  children [
+    DEF SHELF2 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.7 0.5 0.3
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 3 0.4 2
+          }
+        }
+      ]
+      name "storage_shelf_2"
+      boundingObject Box {
+        size 3 0.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation -6 5 0
+  children [
+    DEF SHELF3 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.7 0.5 0.3
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 3 0.4 2
+          }
+        }
+      ]
+      name "storage_shelf_3"
+      boundingObject Box {
+        size 3 0.4 2
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 6 5 0
+  children [
+    DEF SHELF4 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.7 0.5 0.3
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 3 0.4 2
+          }
+        }
+      ]
+      name "storage_shelf_4"
+      boundingObject Box {
+        size 3 0.4 2
+      }
+    }
+  ]
+}
+
+# Stacked Pallets with Boxes - Corner storage areas
+# Southwest corner stacks
+WoodenPallet {
+  translation -5.5 -6 0
+  name "pallet_stack_1_bottom"
+}
+
+CardboardBox {
+  translation -5.5 -6 0.16
+  name "box_on_pallet_1"
+  size 0.8 0.8 0.3
+}
+
+CardboardBox {
+  translation -5.5 -6 0.46
+  name "box_on_pallet_1_top"
+  size 0.7 0.7 0.25
+}
+
+WoodenPallet {
+  translation -4.5 -6 0
+  name "pallet_stack_2_bottom"
+}
+
+PlasticCrate {
+  translation -4.5 -6 0.16
+  name "crate_on_pallet_2"
+}
+
+CardboardBox {
+  translation -4.5 -6 0.56
+  name "box_on_crate_2"
+  size 0.6 0.6 0.3
+}
+
+# Southeast corner stacks
+WoodenPallet {
+  translation 5.5 -6 0
+  name "pallet_stack_3_bottom"
+}
+
+CardboardBox {
+  translation 5.5 -6 0.16
+  name "box_on_pallet_3"
+  size 0.9 0.9 0.4
+}
+
+WoodenPallet {
+  translation 4.5 -6 0
+  name "pallet_stack_4_bottom"
+}
+
+PlasticCrate {
+  translation 4.5 -6 0.16
+  name "crate_on_pallet_4"
+}
+
+PlasticCrate {
+  translation 4.5 -6 0.56
+  name "crate_on_pallet_4_top"
+}
+
+# Northwest corner stacks
+WoodenPallet {
+  translation -5.5 6 0
+  name "pallet_stack_5_bottom"
+}
+
+CardboardBox {
+  translation -5.5 6 0.16
+  name "box_on_pallet_5"
+  size 0.8 0.8 0.35
+}
+
+CardboardBox {
+  translation -5.5 6 0.51
+  name "box_on_pallet_5_top"
+  size 0.6 0.6 0.25
+}
+
+WoodenPallet {
+  translation -4.5 6 0
+  name "pallet_stack_6_bottom"
+}
+
+CardboardBox {
+  translation -4.5 6 0.16
+  name "box_on_pallet_6"
+  size 0.7 0.9 0.3
+}
+
+# Northeast corner stacks
+WoodenPallet {
+  translation 5.5 6 0
+  name "pallet_stack_7_bottom"
+}
+
+PlasticCrate {
+  translation 5.5 6 0.16
+  name "crate_on_pallet_7"
+}
+
+CardboardBox {
+  translation 5.5 6 0.56
+  name "box_on_crate_7"
+  size 0.5 0.5 0.2
+}
+
+# Industrial Barrels - Simple cylinders instead of MetalBarrel proto
+Transform {
+  translation -6.5 -3.5 0
+  children [
+    DEF BARREL1 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.3 0.3 0.3
+            metalness 0.8
+            roughness 0.2
+          }
+          geometry Cylinder {
+            height 1.2
+            radius 0.3
+          }
+        }
+      ]
+      name "industrial_barrel_1"
+      boundingObject Cylinder {
+        height 1.2
+        radius 0.3
+      }
+    }
+  ]
+}
+
+Transform {
+  translation -6.5 -2.5 0
+  children [
+    DEF BARREL2 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.3 0.3 0.3
+            metalness 0.8
+            roughness 0.2
+          }
+          geometry Cylinder {
+            height 1.2
+            radius 0.3
+          }
+        }
+      ]
+      name "industrial_barrel_2"
+      boundingObject Cylinder {
+        height 1.2
+        radius 0.3
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 6.5 3.5 0
+  children [
+    DEF BARREL3 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.3 0.3 0.3
+            metalness 0.8
+            roughness 0.2
+          }
+          geometry Cylinder {
+            height 1.2
+            radius 0.3
+          }
+        }
+      ]
+      name "industrial_barrel_3"
+      boundingObject Cylinder {
+        height 1.2
+        radius 0.3
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 6.5 2.5 0
+  children [
+    DEF BARREL4 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.3 0.3 0.3
+            metalness 0.8
+            roughness 0.2
+          }
+          geometry Cylinder {
+            height 1.2
+            radius 0.3
+          }
+        }
+      ]
+      name "industrial_barrel_4"
+      boundingObject Cylinder {
+        height 1.2
+        radius 0.3
+      }
+    }
+  ]
+}
+
+# Lightweight Forklift - Custom object to avoid mass ratio issues
+Transform {
+  translation -6 0 0.4
+  rotation 0 0 1 1.5708
+  children [
+    DEF LIGHT_FORKLIFT Solid {
+      children [
+        # Main body
+        Transform {
+          translation 0 0 0.5
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 1 0.6 0
+                metalness 0.3
+                roughness 0.7
+              }
+              geometry Box {
+                size 2 1 1
+              }
+            }
+          ]
+        }
+        # Front forks
+        Transform {
+          translation 1.2 -0.3 0.2
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.7 0.7 0.7
+                metalness 0.8
+                roughness 0.2
+              }
+              geometry Box {
+                size 0.8 0.1 0.4
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 1.2 0.3 0.2
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.7 0.7 0.7
+                metalness 0.8
+                roughness 0.2
+              }
+              geometry Box {
+                size 0.8 0.1 0.4
+              }
+            }
+          ]
+        }
+        # Wheels
+        Transform {
+          translation -0.7 -0.4 0
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.2 0.2 0.2
+              }
+              geometry Cylinder {
+                height 0.2
+                radius 0.3
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.7 0.4 0
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.2 0.2 0.2
+              }
+              geometry Cylinder {
+                height 0.2
+                radius 0.3
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0.7 -0.4 0
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.2 0.2 0.2
+              }
+              geometry Cylinder {
+                height 0.2
+                radius 0.3
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0.7 0.4 0
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.2 0.2 0.2
+              }
+              geometry Cylinder {
+                height 0.2
+                radius 0.3
+              }
+            }
+          ]
+        }
+      ]
+      name "lightweight_forklift"
+      boundingObject Group {
+        children [
+          Transform {
+            translation 0 0 0.5
+            children [
+              Box {
+                size 2 1 1
+              }
+            ]
+          }
+        ]
+      }
+      physics Physics {
+        density 500
+      }
+    }
+  ]
+}
+
+# Simple Work Tables instead of WorkBench proto
+Transform {
+  translation 5 3.5 0
+  children [
+    DEF WORKTABLE1 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.6 0.4 0.2
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 2 1 0.8
+          }
+        }
+      ]
+      name "work_table_1"
+      boundingObject Box {
+        size 2 1 0.8
+      }
+    }
+  ]
+}
+
+Transform {
+  translation -5 -3.5 0
+  children [
+    DEF WORKTABLE2 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.6 0.4 0.2
+            metalness 0.1
+            roughness 0.8
+          }
+          geometry Box {
+            size 2 1 0.8
+          }
+        }
+      ]
+      name "work_table_2"
+      boundingObject Box {
+        size 2 1 0.8
+      }
+    }
+  ]
+}
+
+# Conveyor Belt Segments with Pick and Drop Arms
+ConveyorBelt {
+  translation 0 -5.5 0
+  rotation 0 0 1 1.5708
+  name "belt1"
+  size 4 0.5 0.2
+  speed 0
+}
+
+# Arms beside Conveyor Belt 1 (South)
+# Arm 1: Puma560 - Industrial 6-DOF robot
+Puma560 {
+  translation -0.57 -4.54 0.2
+  rotation 0 0 1 0
+  name "pick_arm_1_puma560"
+  controller "<generic>"
+}
+
+# Arm 2: IprHd6m90 - Neuronics IPR robot
+IprHd6m90 {
+  translation 0.51 -5.16 0
+  rotation 0 0 1 3.14159
+  name "pick_arm_2_ipr"
+  controller "<generic>"
+}
+
+ConveyorBelt {
+  translation 0 5.5 0
+  rotation 0 0 1 1.5708
+  name "belt2"
+  size 4 0.5 0.2
+  speed 0
+}
+
+# Arms beside Conveyor Belt 2 (North)
+# Arm 3: Puma560 - Industrial 6-DOF robot
+Puma560 {
+  translation -0.64 4.16 0.2
+  rotation 0 0 1 0
+  name "pick_arm_3_puma560"
+  controller "<generic>"
+}
+
+# Arm 4: IprHd6m90 - Neuronics IPR robot
+IprHd6m90 {
+  translation 0.61 5.59 0
+  rotation 0 0 1 3.14159
+  name "pick_arm_4_ipr"
+  controller "<generic>"
+}
+
+# Loading Docks - Simple floor markings
+Transform {
+  translation -6.8 0 0.001
+  children [
+    DEF LOADING_DOCK1 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0.8 0
+            transparency 0.3
+            emissiveColor 0 0.5 0
+            emissiveIntensity 0.3
+          }
+          geometry Box {
+            size 0.8 3 0.01
+          }
+        }
+      ]
+      name "loading_dock_1"
+    }
+  ]
+}
+
+Transform {
+  translation 6.8 0 0.001
+  children [
+    DEF LOADING_DOCK2 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0.8 0
+            transparency 0.3
+            emissiveColor 0 0.5 0
+            emissiveIntensity 0.3
+          }
+          geometry Box {
+            size 0.8 3 0.01
+          }
+        }
+      ]
+      name "loading_dock_2"
+    }
+  ]
+}
+
+# Floor Lane Markings - Enhanced navigation system
+Transform {
+  translation 0 0 0.002
+  children [
+    # Main corridor marking (vertical)
+    Solid {
+      translation 0 0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 1 0
+            emissiveColor 1 1 0
+            emissiveIntensity 0.5
+          }
+          geometry Box {
+            size 0.1 8 0.001
+          }
+        }
+      ]
+      name "lane_marking_vertical"
+    }
+    # Cross corridor marking (horizontal)  
+    Solid {
+      translation 0 0 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 1 0
+            emissiveColor 1 1 0
+            emissiveIntensity 0.5
+          }
+          geometry Box {
+            size 8 0.1 0.001
+          }
+        }
+      ]
+      name "lane_marking_horizontal"
+    }
+    # Corner safety markings
+    Solid {
+      translation -3.5 -3.5 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0.5 0
+            emissiveColor 1 0.5 0
+            emissiveIntensity 0.4
+          }
+          geometry Box {
+            size 0.8 0.8 0.001
+          }
+        }
+      ]
+      name "safety_marking_1"
+    }
+    Solid {
+      translation 3.5 3.5 0
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0.5 0
+            emissiveColor 1 0.5 0
+            emissiveIntensity 0.4
+          }
+          geometry Box {
+            size 0.8 0.8 0.001
+          }
+        }
+      ]
+      name "safety_marking_2"
+    }
+  ]
+}
+
+# Static Obstacles - Equipment that AGVs need to navigate around
+Transform {
+  translation -3 3 0
+  children [
+    DEF OBSTACLE1 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.5 0.5 0.5
+            metalness 0.7
+            roughness 0.3
+          }
+          geometry Cylinder {
+            height 0.8
+            radius 0.3
+          }
+        }
+      ]
+      name "equipment_1"
+      boundingObject Cylinder {
+        height 0.8
+        radius 0.3
+      }
+    }
+  ]
+}
+
+Transform {
+  translation 3 -3 0
+  children [
+    DEF OBSTACLE2 Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.5 0.5 0.5
+            metalness 0.7
+            roughness 0.3
+          }
+          geometry Box {
+            size 0.8 0.8 1.2
+          }
+        }
+      ]
+      name "equipment_2"
+      boundingObject Box {
+        size 0.8 0.8 1.2
+      }
+    }
+  ]
 }
 
 Robot {
@@ -276,58 +1088,67 @@ Transform {
   ]
 }
 
-# AMR 1 - Top row, second column
+# AMR 2 - Upper row, first position
 AMR {
   translation -1.0 2.0 0
-  rotation 0 0 1 0.785398
-  name "AMR1"
-  baseColor 0.2 0.2 0.6
-  controller "amr_controller"
-}
-
-# AMR 2 - Top row, third column
-AMR {
-  translation 1.0 2.0 0
   rotation 0 0 1 0
   name "AMR2"
   baseColor 0.2 0.6 0.2
   controller "amr_controller"
 }
 
-# AMR 3 - Top row, fourth column
+# AMR 3 - Upper row, second position
 AMR {
-  translation 3.0 2.0 0
-  rotation 0 0 1 -0.785398
+  translation 1.0 2.0 0
+  rotation 0 0 1 0
   name "AMR3"
   baseColor 0.6 0.2 0.2
   controller "amr_controller"
 }
 
-# AMR 4 - Bottom row, second column
+# AMR 4 - Upper row, third position
 AMR {
-  translation -1.0 -2.0 0
-  rotation 0 0 1 1.5708
+  translation 3.0 2.0 0
+  rotation 0 0 1 0
   name "AMR4"
   baseColor 0.6 0.6 0.2
   controller "amr_controller"
 }
 
-# AMR 5 - Bottom row, third column
+# AMR 5 - Lower row, first position
 AMR {
-  translation 1.0 -2.0 0
+  translation -1.0 -2.0 0
   rotation 0 0 1 0
   name "AMR5"
   baseColor 0.2 0.6 0.6
   controller "amr_controller"
 }
 
-# AMR 6 - Bottom row, fourth column
+# AMR 6 - Lower row, second position
 AMR {
-  translation 3.0 -2.0 0
-  rotation 0 0 1 -1.5708
+  translation 1.0 -2.0 0
+  rotation 0 0 1 0
   name "AMR6"
   baseColor 0.6 0.2 0.6
   controller "amr_controller"
 }
 
+# AMR 7 - Lower row, third position
+AMR {
+  translation 3.0 -2.0 0
+  rotation 0 0 1 0
+  name "AMR7"
+  baseColor 0.8 0.4 0.2
+  controller "amr_controller"
+}
+
+# Ned robotic arm - positioned near the center for easy access
+Ned {
+  translation 0 0 0.2
+  rotation 0 0 1 0
+  name "Ned"
+  controller "<extern>"
+}
+
 # End of world file
+
