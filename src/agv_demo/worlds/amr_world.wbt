@@ -627,7 +627,7 @@ Transform {
 ConveyorBelt {
   translation 0 -5.5 0
   rotation 0 0 1 1.5708
-  name "belt1"
+  name "belt001"
   size 4 0.5 0.2
   speed 0
 }
@@ -649,13 +649,6 @@ IprHd6m90 {
   controller "<generic>"
 }
 
-ConveyorBelt {
-  translation 0 5.5 0
-  rotation 0 0 1 1.5708
-  name "belt2"
-  size 4 0.5 0.2
-  speed 0
-}
 
 # Arms beside Conveyor Belt 2 (North)
 # Arm 3: Puma560 - Industrial 6-DOF robot
@@ -1088,56 +1081,56 @@ Transform {
   ]
 }
 
-# AMR 2 - Upper row, first position
+# AGV 1 - Upper row, first position
 AMR {
   translation -1.0 2.0 0
   rotation 0 0 1 0
-  name "AMR2"
+  name "agv001"
   baseColor 0.2 0.6 0.2
   controller "amr_controller"
 }
 
-# AMR 3 - Upper row, second position
+# AGV 2 - Upper row, second position
 AMR {
   translation 1.0 2.0 0
   rotation 0 0 1 0
-  name "AMR3"
+  name "agv002"
   baseColor 0.6 0.2 0.2
   controller "amr_controller"
 }
 
-# AMR 4 - Upper row, third position
+# AGV 3 - Upper row, third position
 AMR {
   translation 3.0 2.0 0
   rotation 0 0 1 0
-  name "AMR4"
+  name "agv003"
   baseColor 0.6 0.6 0.2
   controller "amr_controller"
 }
 
-# AMR 5 - Lower row, first position
+# AGV 4 - Lower row, first position
 AMR {
   translation -1.0 -2.0 0
   rotation 0 0 1 0
-  name "AMR5"
+  name "agv004"
   baseColor 0.2 0.6 0.6
   controller "amr_controller"
 }
 
-# AMR 6 - Lower row, second position
+# AGV 5 - Lower row, second position
 AMR {
   translation 1.0 -2.0 0
   rotation 0 0 1 0
-  name "AMR6"
+  name "agv005"
   baseColor 0.6 0.2 0.6
   controller "amr_controller"
 }
 
-# AMR 7 - Lower row, third position
+# AGV 6 - Lower row, third position
 AMR {
   translation 3.0 -2.0 0
   rotation 0 0 1 0
-  name "AMR7"
+  name "agv006"
   baseColor 0.8 0.4 0.2
   controller "amr_controller"
 }
@@ -1146,7 +1139,7 @@ AMR {
 Ned {
   translation 0 0 0.2
   rotation 0 0 1 0
-  name "Ned"
+  name "arm001"
   controller "<extern>"
 }
 

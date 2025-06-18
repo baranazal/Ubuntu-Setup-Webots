@@ -54,6 +54,11 @@ pickup_lock = threading.Lock()
 position_tolerance = 0.02
 collision_distance = 0
 
+# Robots arrays
+agv_names = ["agv001", "agv002", "agv003", "agv004", "agv005", "agv006"]
+arm_names = ["arm001"]
+belt_names = ["belt001"]
+
 ned_movements = {
     "home": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 }
@@ -79,9 +84,7 @@ class AMRNavigator(Node):
         
         self.cmd_vel_publishers = {}
         
-        robot_names = ["AMR2", "AMR3", "AMR4", "AMR5", "AMR6", "AMR7"]
-        
-        for robot_name in robot_names:
+        for robot_name in agv_names:
             qos = QoSProfile(depth=10)
             qos.reliability = ReliabilityPolicy.RELIABLE
             
@@ -397,9 +400,8 @@ class AMRStatusMonitor(Node):
         super().__init__('amr_status_monitor')
         
         self.odom_subscribers = {}
-        robot_names = ["AMR2", "AMR3", "AMR4", "AMR5", "AMR6", "AMR7"]
         
-        for robot_name in robot_names:
+        for robot_name in agv_names:
             with status_lock:
                 robot_status[robot_name] = {
                     "position": {"x": 0.0, "y": 0.0, "z": 0.0},
@@ -735,10 +737,10 @@ operation_handler = None
 app = Flask(__name__)
 
 ################################################################### START OF INDIVIDUAL COMPONENT APIs ####################################################################
-# This one is used to move the AMR to a specified coordinates
-@app.route('/api/movement/AMR', methods=['POST'])
-def move_amr():
-    """API endpoint to move the AMR to specified coordinates with orientation"""
+# This one is used to move the AGV to a specified coordinates
+@app.route('/api/movement/AGV', methods=['POST'])
+def move_agv():
+    """API endpoint to move the AGV to specified coordinates with orientation"""
     global navigator_node
     
     try:
@@ -746,12 +748,19 @@ def move_amr():
         if not data:
             return jsonify({"success": False, "error": "Missing request body"}), 400
         
-        required_fields = ['robot_id', 'x', 'y', 'z', 'roll', 'pitch', 'yaw']
+        required_fields = ['agv_id', 'x', 'y', 'z', 'roll', 'pitch', 'yaw']
         for field in required_fields:
             if field not in data:
                 return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
         
-        robot_id = data['robot_id']
+        agv_id = data['agv_id']
+        
+        if agv_id not in agv_names:
+            return jsonify({
+                "success": False,
+                "error": f"Invalid agv_id '{agv_id}'. Available AGVs: {', '.join(agv_names)}"
+            }), 400
+        
         target_x = float(data['x'])
         target_y = float(data['y'])
         target_z = float(data['z'])
@@ -761,26 +770,26 @@ def move_amr():
         target_yaw = float(data['yaw'])
         
         with status_lock:
-            if robot_id not in robot_status:
+            if agv_id not in robot_status:
                 available_robots = list(robot_status.keys())
                 if len(available_robots) == 0:
-                    error_msg = "No robots are currently available in the simulation"
+                    error_msg = "No AGVs are currently available in the simulation"
                 else:
-                    error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+                    error_msg = f"AGV '{agv_id}' not found. Currently, only these AGVs exist: {', '.join(available_robots)}"
                     
                 return jsonify({
                     "success": False,
                     "error": error_msg,
-                    "available_robots": available_robots
+                    "available_agvs": available_robots
                 }), 404
                 
         if navigator_node and navigator_node.start_navigation_to_coordinates(
-            robot_id, target_x, target_y, target_z, target_roll, target_pitch, target_yaw
+            agv_id, target_x, target_y, target_z, target_roll, target_pitch, target_yaw
         ):
             return jsonify({
                 "success": True,
-                "message": f"Robot {robot_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z}) with orientation (roll: {target_roll}, pitch: {target_pitch}, yaw: {target_yaw})",
-                "robot_id": robot_id,
+                "message": f"AGV {agv_id} is being redirected to coordinates ({target_x}, {target_y}, {target_z}) with orientation (roll: {target_roll}, pitch: {target_pitch}, yaw: {target_yaw})",
+                "agv_id": agv_id,
                 "target_position": {"x": target_x, "y": target_y, "z": target_z},
                 "target_orientation": {"roll": target_roll, "pitch": target_pitch, "yaw": target_yaw}
             })
@@ -802,13 +811,14 @@ def move_amr():
             "error": f"Internal server error: {str(e)}"
         }), 500
 
-@app.route('/api/movement/robotic_arm', methods=['POST'])
+@app.route('/api/movement/ROBOTIC_ARM', methods=['POST'])
 def move_robotic_arm():
     """
     API endpoint to control the Ned robotic arm
     
     Expected JSON payload:
     {
+        "arm_id": "arm001",      // ID of the robotic arm (required)
         "sequence": [
             {"action": "move", "joint_positions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "delay": 1.0},
             {"action": "gripper", "position": 1.0, "delay": 0.5},
@@ -823,10 +833,17 @@ def move_robotic_arm():
     if not data:
         return jsonify({"success": False, "error": "Missing request body"}), 400
     
-    if 'sequence' not in data:
+    required_fields = ['arm_id', 'sequence']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
+    
+    arm_id = data['arm_id']
+    
+    if arm_id not in arm_names:
         return jsonify({
-            "success": False, 
-            "error": "Missing required field: 'sequence'"
+            "success": False,
+            "error": f"Invalid arm_id '{arm_id}'. Available arms: {', '.join(arm_names)}"
         }), 400
     
     try:
@@ -871,6 +888,7 @@ def move_robotic_arm():
         return jsonify({
             "success": True,
             "message": "Executing custom movement sequence",
+            "arm_id": arm_id,
             "sequence_length": len(sequence)
         })
         
@@ -881,13 +899,14 @@ def move_robotic_arm():
         }), 400
 
 # This one is used to control the conveyor belt
-@app.route('/api/movement/conveyor_belt', methods=['POST'])
+@app.route('/api/movement/CONVEYOR_BELT', methods=['POST'])
 def control_conveyor_belt():
     """
     API endpoint to control the conveyor belt
     
     Expected JSON payload:
     {
+        "belt_id": "belt001",    // ID of the belt (required)
         "speed": 0.5,            // Speed value (positive number)
         "direction": "forward",  // "forward" or "reverse"
         "running": true          // true to run the belt, false to stop it
@@ -899,10 +918,18 @@ def control_conveyor_belt():
     if not data:
         return jsonify({"success": False, "error": "Missing request body"}), 400
     
-    required_fields = ['speed', 'direction', 'running']
+    required_fields = ['belt_id', 'speed', 'direction', 'running']
     for field in required_fields:
         if field not in data:
             return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
+    
+    belt_id = data['belt_id']
+    
+    if belt_id not in belt_names:
+        return jsonify({
+            "success": False,
+            "error": f"Invalid belt_id '{belt_id}'. Available belts: {', '.join(belt_names)}"
+        }), 400
     
     try:
         speed_value = float(data['speed'])
@@ -917,7 +944,8 @@ def control_conveyor_belt():
             if success:
                 return jsonify({
                     "success": True,
-                    "message": "Belt stopped"
+                    "message": "Belt stopped",
+                    "belt_id": belt_id
                 })
             else:
                 return jsonify({"success": False, "error": "Failed to stop belt"}), 500
@@ -931,6 +959,7 @@ def control_conveyor_belt():
                 return jsonify({
                     "success": True,
                     "message": f"Belt moving in {direction} direction at speed {abs_speed}",
+                    "belt_id": belt_id,
                     "direction": direction,
                     "speed": abs_speed,
                     "running": running
@@ -942,101 +971,112 @@ def control_conveyor_belt():
 
 @app.route('/api/status/<robot_id>', methods=['GET'])
 def get_status(robot_id):
-    """API endpoint to get the status of a specific AMR robot with orientation details"""
+    """API endpoint to get the status of robots including AGV (agv001), arm (arm001), and belt (belt001)"""
     try:
-        with status_lock:
-            if robot_id in robot_status:
-                status = robot_status[robot_id]
-                
-                nav_info = {}
-                with nav_lock:
-                    if robot_id in nav_status:
-                        robot_nav = nav_status[robot_id]
-                        nav_info = {
-                            "active": robot_nav["active"],
-                            "status": robot_nav["status"]
-                        }
-                        
-                        if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
-                            nav_info["target_coordinates"] = robot_nav["target_coordinates"]
-                        
-                        if "target_orientation" in robot_nav and robot_nav["target_orientation"]:
-                            nav_info["target_orientation"] = robot_nav["target_orientation"]
-                        
-                        if "final_position" in robot_nav:
-                            nav_info["final_position"] = robot_nav["final_position"]
-                
-                velocities = None
-                if "velocities" in status:
-                    velocities = status["velocities"]
+        if robot_id in agv_names:
+            with status_lock:
+                if robot_id in robot_status:
+                    status = robot_status[robot_id]
+                    
+                    nav_info = {}
+                    with nav_lock:
+                        if robot_id in nav_status:
+                            robot_nav = nav_status[robot_id]
+                            nav_info = {
+                                "active": robot_nav["active"],
+                                "status": robot_nav["status"]
+                            }
+                            
+                            if "target_coordinates" in robot_nav and robot_nav["target_coordinates"]:
+                                nav_info["target_coordinates"] = robot_nav["target_coordinates"]
+                            
+                            if "target_orientation" in robot_nav and robot_nav["target_orientation"]:
+                                nav_info["target_orientation"] = robot_nav["target_orientation"]
+                            
+                            if "final_position" in robot_nav:
+                                nav_info["final_position"] = robot_nav["final_position"]
+                    
+                    velocities = None
+                    if "velocities" in status:
+                        velocities = status["velocities"]
+                    
+                    return jsonify({
+                        "robot_id": robot_id,
+                        "robot_type": "AGV",
+                        "position": status["position"],
+                        "orientation": status["orientation"],
+                        "moving": status["moving"],
+                        "last_updated": status["last_updated"],
+                        "navigation": nav_info,
+                        "velocities": velocities,
+                        "timestamp": time.time()
+                    })
+                else:
+                    available_robots = list(robot_status.keys())
+                    if len(available_robots) == 0:
+                        error_msg = "No AGV robots are currently available in the simulation"
+                    else:
+                        error_msg = f"AGV '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+                    
+                    return jsonify({
+                        "error": error_msg,
+                        "available_robots": available_robots
+                    }), 404
+        
+        elif robot_id in arm_names:
+            with ned_lock:
+                is_moving = ned_status["moving"]
+                positions = ned_status["joint_positions"]
+                gripper_position = ned_status["gripper_position"]
+                last_updated = ned_status["last_updated"]
                 
                 return jsonify({
                     "robot_id": robot_id,
-                    "position": status["position"],
-                    "orientation": status["orientation"],
-                    "moving": status["moving"],
-                    "last_updated": status["last_updated"],
-                    "navigation": nav_info,
-                    "velocities": velocities,
+                    "robot_type": "ROBOTIC_ARM", 
+                    "moving": is_moving,
+                    "joint_positions": positions,
+                    "gripper_position": gripper_position,
+                    "last_updated": last_updated,
                     "timestamp": time.time()
                 })
-            else:
-                available_robots = list(robot_status.keys())
-                if len(available_robots) == 0:
-                    error_msg = "No robots are currently available in the simulation"
-                else:
-                    error_msg = f"Robot '{robot_id}' not found. Currently, only these robots exist: {', '.join(available_robots)}"
+        
+        elif robot_id in belt_names:
+            with belt_lock:
+                speed = belt_status["current_speed"]
+                direction = "forward" if speed >= 0 else "reverse"
+                status = "running" if abs(speed) > 0.0 else "stopped"
                 
-                return jsonify({
-                    "error": error_msg,
-                    "available_robots": available_robots
-                }), 404
+                from collections import OrderedDict
+                response_data = OrderedDict([
+                    ("robot_id", robot_id),
+                    ("robot_type", "CONVEYOR_BELT"),
+                    ("direction", direction),
+                    ("status", status),
+                    ("raw_speed", speed),
+                    ("speed", abs(speed)),
+                    ("last_updated", belt_status["last_updated"]),
+                    ("timestamp", time.time())
+                ])
+                
+                return Response(
+                    json.dumps(response_data),
+                    mimetype='application/json'
+                )
+        
+        else:
+            return jsonify({
+                "error": f"Unknown robot ID '{robot_id}'. Available robots: AGV: {', '.join(agv_names)}, ARM: {', '.join(arm_names)}, BELT: {', '.join(belt_names)}",
+                "robot_id": robot_id,
+                "available_agv": agv_names,
+                "available_arm": arm_names,
+                "available_belt": belt_names
+            }), 404
                 
     except Exception as e:
         return jsonify({
             "success": False,
             "error": f"Internal server error: {str(e)}"
         }), 500
-
-@app.route('/api/belt/status', methods=['GET'])
-def get_belt_status():
-    """Get the current status of the conveyor belt"""
-    with belt_lock:
-        speed = belt_status["current_speed"]
-        direction = "forward" if speed >= 0 else "reverse"
-        status = "running" if abs(speed) > 0.0 else "stopped"
-        
-        from collections import OrderedDict
-        response_data = OrderedDict([
-            ("direction", direction),
-            ("status", status),
-            ("raw_speed", speed),
-            ("speed", abs(speed)),
-            ("last_updated", belt_status["last_updated"]),
-            ("timestamp", time.time())
-        ])
-        
-        return Response(
-            json.dumps(response_data),
-            mimetype='application/json'
-        )
-
-@app.route('/api/ned/status', methods=['GET'])
-def get_ned_status():
-    """API endpoint to get the status of the Ned arm"""
-    with ned_lock:
-        is_moving = ned_status["moving"]
-        positions = ned_status["joint_positions"]
-        gripper_position = ned_status["gripper_position"]
-        last_updated = ned_status["last_updated"]
-        
-        return jsonify({
-            "moving": is_moving,
-            "joint_positions": positions,
-            "gripper_position": gripper_position,
-            "last_updated": last_updated,
-            "timestamp": time.time()
-        })
 
 def run_flask_server(host='0.0.0.0', port=5000):
     """Run the Flask server with optimized settings"""
